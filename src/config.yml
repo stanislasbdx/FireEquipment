@@ -1,0 +1,12 @@
+# SeriousRP | Owner : stan1712 
+Version: VERSION NOT SET PLEASE SET ConfigFix TO true
+ConfigFix: true
+Prefix: FireEquipement
+
+#Core messages
+Core:
+  NoPerms: "Vous n'avez pas la permission !"
+  HelpMsg:
+    Help: "Besoin d'aide ? Tapez /firequip help"
+    VersionHelp: "Version du plugin ? Tapez /firequip version"
+    StatusHelp: "Quels sont les modules activés ? /firequip status"
