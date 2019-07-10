@@ -5,8 +5,26 @@ Prefix: FireEquipement
 
 #Core messages
 Core:
-  NoPerms: "Vous n'avez pas la permission !"
+  NoPerms: "You don't have the permission !"
   HelpMsg:
-    Help: "Besoin d'aide ? Tapez /firequip help"
-    VersionHelp: "Version du plugin ? Tapez /firequip version"
-    StatusHelp: "Quels sont les modules activés ? /firequip status"
+    Help: "Need help ? Type /firequip help"
+    VersionHelp: "Plugin's version ? Type /firequip version"
+    DHelp: "Shows a help page"
+    DVersion: "Be able to know plugin's version"
+    DGive: "Be able to give yourself an item"
+  GiveMsg:
+    Home: "What item do you want ?"
+    Hose: "You get an Fire Hose"
+    Pump: "You get a pump"
+    Extinguisher: "You get an extinguisher"
+    
+Equipment:
+  Hose:
+    displayName: "Fire Hose"
+    range: 5
+  Pump:
+    displayName: "Water Pump"
+    range: 4
+  Extinguisher:
+    displayName: "Extinguisher"
+    range: 2
