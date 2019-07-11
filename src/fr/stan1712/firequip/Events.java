@@ -26,7 +26,7 @@ public class Events implements Listener {
     }
     
     @EventHandler
-    public void onPlayerUse(PlayerInteractEvent event) throws InterruptedException{
+    public void onPlayerUse(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
         	
@@ -46,7 +46,7 @@ public class Events implements Listener {
     	            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 15, 10));
     	            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 15, 999));
     	            
-    	            for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Hose.range"); d += 0.5){
+    	            for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Hose.range"); d += 1){
     	                loc.add(loc.getDirection());
     	                world.playSound(loc, Sound.BLOCK_CLOTH_BREAK, 5, 5);
     	                world.spawnParticle(Particle.WATER_SPLASH, loc, 100);
@@ -63,6 +63,8 @@ public class Events implements Listener {
         	                }
     	                }
     	            }
+    	            
+    	            event.setCancelled(true);
             	}
     		}
     		
@@ -79,9 +81,9 @@ public class Events implements Listener {
     	        	Location loc = player.getEyeLocation();
     	            World world = player.getWorld();
     	            
-    	            for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Pump.range"); d += 0.5){
+    	            for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Pump.range"); d += 0.75){
     	                loc.add(loc.getDirection());
-    	                world.playSound(loc, Sound.BLOCK_LAVA_EXTINGUISH, 1, 3);
+    	                world.playSound(loc, Sound.BLOCK_LAVA_EXTINGUISH, (float) 0.5, -2);
     	                world.spawnParticle(Particle.TOWN_AURA, loc, 10);
 
                 		if(world.getBlockAt(loc).isLiquid()) {
@@ -107,7 +109,7 @@ public class Events implements Listener {
     	            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 15, 1));
     	            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 15, 999));
     	            
-    	            for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Hose.range"); d += 0.5){
+    	            for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Hose.range"); d += 1){
     	                loc.add(loc.getDirection());
     	                world.playSound(loc, Sound.ENTITY_TNT_PRIMED, 3, 10);
     	                world.spawnParticle(Particle.FALLING_DUST, loc, 10);
@@ -118,10 +120,11 @@ public class Events implements Listener {
     	                		if(world.getBlockAt(loc).getType().equals(Material.FIRE)) {
     	                			world.getBlockAt(loc).setType(Material.AIR);
     	                		}
-    	                		
         	                }
     	                }
     	            }
+    	            
+    	            event.setCancelled(true);
             	}
     		}
         	
