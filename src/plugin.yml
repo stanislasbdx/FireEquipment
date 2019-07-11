@@ -1,7 +1,7 @@
-name: FireEquipement
+name: FireEquipment
 description: Roleplay Plugin for Firefigther
 author: stan1712
-version: 1.4
+version: 1.5
 main: fr.stan1712.firequip.Main
 
 commands:
