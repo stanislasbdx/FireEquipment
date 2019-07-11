@@ -7,6 +7,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener {	
+	
 	public void versionCheck() {
 		String version = getServer().getVersion();
 		console.sendMessage("[FireEquipment] " + ChatColor.BLUE + "Server version : " + version);
