@@ -6,6 +6,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.stan1712.firequip.UpdateChecker;
+
 public class Main extends JavaPlugin implements Listener {	
 	
 	public void versionCheck() {
@@ -70,6 +72,11 @@ public class Main extends JavaPlugin implements Listener {
 		console.sendMessage("[FireEquipment] " + ChatColor.BLUE + " ");
 		console.sendMessage("[FireEquipment] " + ChatColor.DARK_BLUE + "#- Version check -#");
 		versionCheck();
+		new UpdateChecker(this, 69199).getVersion(version -> {
+            if(!this.getDescription().getVersion().equalsIgnoreCase(version)) {            	
+            	console.sendMessage("[FireEquipment] " + ChatColor.BLUE + "An update is available on Spigot !");
+            }
+        });
 		
 		/*
 		 * Class loader (project)
