@@ -30,7 +30,7 @@ public class Commands implements Listener{
 				if(args.length == 2) {
 					if(args[1].equalsIgnoreCase("version")) {
 			            player.sendMessage(ChatColor.RED + "+----- ▲ " + this.pl.getConfig().getString("Prefix").replace("&", "§") + " ▲ -----+");
-			            player.sendMessage(ChatColor.WHITE + "» " + this.pl.getConfig().getString("Version").replace("&", "§"));
+			            player.sendMessage(ChatColor.WHITE + "» Version " + this.pl.getConfig().getString("Version").replace("&", "§"));
 			            player.sendMessage(ChatColor.RED + "+----- ----- ----- -----+");
 					}
 					else if(args[1].equalsIgnoreCase("help")) {
@@ -57,7 +57,7 @@ public class Commands implements Listener{
 			if(player.hasPermission("firequip.tools.give")) {
 				if(args.length == 2) {
 					if(args[1].equalsIgnoreCase("hose")) {
-				        ItemStack hose = new ItemStack(Material.GOLD_HOE);
+				        ItemStack hose = new ItemStack(Material.GOLDEN_HOE);
 				        ItemMeta meta = hose.getItemMeta();
 				       
 				        meta.addEnchant(Enchantment.PROTECTION_FIRE, 10, true);

@@ -31,7 +31,7 @@ public class Events implements Listener {
         if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
         	
         	// lance a eau
-	        ItemStack hose = new ItemStack(Material.GOLD_HOE);
+	        ItemStack hose = new ItemStack(Material.GOLDEN_HOE);
 	        ItemMeta meta = hose.getItemMeta();
 
 	        meta.addEnchant(Enchantment.PROTECTION_FIRE, 10, true);
@@ -48,13 +48,14 @@ public class Events implements Listener {
     	            
     	            for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Hose.range"); d += 1){
     	                loc.add(loc.getDirection());
-    	                world.playSound(loc, Sound.BLOCK_CLOTH_BREAK, 5, 5);
+    	                world.playSound(loc, Sound.ENTITY_DOLPHIN_SPLASH, 5, 5);
     	                world.spawnParticle(Particle.WATER_SPLASH, loc, 100);
+    	                world.spawnParticle(Particle.FALLING_WATER, loc, 65);
     	                
     	                double random = Math.random();
     	                if(d >= 1) {
     	                	if(random >= 0.2) {
-    	                		if(world.getBlockAt(loc).isEmpty()) {
+    	                		if(world.getBlockAt(loc).isEmpty() || world.getBlockAt(loc).getType().equals(Material.FIRE)) {
     	                			world.getBlockAt(loc).setType(Material.WATER);
     	                		}
     	                		else {
@@ -93,7 +94,7 @@ public class Events implements Listener {
             	}
     		}
     		
-        	// exctincteur
+        	// extincteur
     		ItemStack extinguisher = new ItemStack(Material.IRON_HOE);
 	        ItemMeta meta2 = extinguisher.getItemMeta();
 
@@ -112,7 +113,7 @@ public class Events implements Listener {
     	            for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Hose.range"); d += 1){
     	                loc.add(loc.getDirection());
     	                world.playSound(loc, Sound.ENTITY_TNT_PRIMED, 3, 10);
-    	                world.spawnParticle(Particle.FALLING_DUST, loc, 10);
+    	                world.spawnParticle(Particle.FALLING_WATER, loc, 4);
     	                
     	                double random = Math.random();
     	                if(d >= 1) {

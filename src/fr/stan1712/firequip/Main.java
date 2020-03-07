@@ -11,10 +11,16 @@ public class Main extends JavaPlugin implements Listener {
 	public void versionCheck() {
 		String version = getServer().getVersion();
 		console.sendMessage("[FireEquipment] " + ChatColor.BLUE + "Server version : " + version);
-		if(version.contains("Spigot")) {
-			if(version.contains("1.12")) {
+		if(version.contains("Spigot") || version.contains("Paper")) {
+			if(version.contains("1.13") || version.contains("1.14") || version.contains("1.15")) {
 				console.sendMessage("[FireEquipment] " + ChatColor.GREEN + "Version check !");
 				console.sendMessage("[FireEquipment] " + ChatColor.GREEN + "If you got issues, you can report them on Github");
+			}
+			else if(version.contains("1.12")){
+				console.sendMessage("[FireEquipment] " + ChatColor.GOLD + "*** WARNING ***");
+				console.sendMessage("[FireEquipment] " + ChatColor.GOLD + "* 1.12 may have errors while running *");
+				console.sendMessage("[FireEquipment] " + ChatColor.GOLD + "* If you got errors, report it on Github *");
+				console.sendMessage("[FireEquipment] " + ChatColor.GOLD + "*** *** ***");
 			}
 			else if(version.contains("1.11")){
 				console.sendMessage("[FireEquipment] " + ChatColor.RED + "*** WARNING ***");
