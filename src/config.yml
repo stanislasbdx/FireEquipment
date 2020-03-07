@@ -1,9 +1,7 @@
-# SeriousRP | Owner : stan1712 
-Version: VERSION NOT SET PLEASE SET ConfigFix TO true
+Version: 0
 ConfigFix: true
 Prefix: FireEquipement
 
-#Core messages
 Core:
   NoPerms: "You don't have the permission !"
   HelpMsg:

@@ -8,14 +8,23 @@ import net.md_5.bungee.api.ChatColor;
 
 public class Config implements Listener {
 	private Plugin plugin = Main.getPlugin(Main.class);
+
+	String version = this.plugin.getDescription().getVersion();
+	String fileVersion = this.plugin.getConfig().getString("Version");
 	
-	String version = "Version 1.5";
+	Boolean updatable;
 
 	private void VersionUpdate() {
-		FileConfiguration config = plugin.getConfig();
 		plugin.getConfig();
 		    
-		config.set("Version", version);
+		if(!version.equals(fileVersion)) {
+			plugin.getConfig().set("Version", version);
+			plugin.getServer().getConsoleSender().sendMessage("[FireEquipment] " + ChatColor.GREEN + "config.yml upgraded (" + fileVersion + " -> " + version + ") !");
+			
+			plugin.getConfig().set("ConfigFix", Boolean.valueOf(true));
+			new Config();
+            plugin.saveConfig();
+		}
 	}
 	
 	public Config() {
@@ -23,15 +32,16 @@ public class Config implements Listener {
 		plugin.getConfig();
 	    
 	    VersionUpdate();
+	    config.options().header("FireEquipment | Owner : stan1712 \n"
+	    		+ "Our Discord : https://discord.gg/DkQSQa7");
 	    
-	    config.options().header("FireEquipment | Owner : stan1712 \nTraductors : ErHak_ / legaming04 -> https://github.com/stan1712/FireEquipement/wiki/Translations \nOur Discord : https://discord.gg/DkQSQa7");
-	    if(this.plugin.getConfig().getBoolean("ConfigFix")) {
+	    if(config.getBoolean("ConfigFix")) {
 	      config.options().copyDefaults(true);
 	      config.options().copyHeader(true);
 	      
 	      config.set("ConfigFix", Boolean.valueOf(false));
 	      
-	      plugin.getServer().getConsoleSender().sendMessage("[FireEquipment] " + ChatColor.GREEN + "config.yml fixed !");
+	      plugin.getServer().getConsoleSender().sendMessage("[FireEquipment] " + ChatColor.GREEN + "config.yml updated !");
 	    }
 	    
 		plugin.getServer().getConsoleSender().sendMessage("[FireEquipment] " + ChatColor.GREEN + "Config file up and running !");
