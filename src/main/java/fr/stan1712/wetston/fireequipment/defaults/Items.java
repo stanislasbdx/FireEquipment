@@ -35,8 +35,10 @@ public class Items {
 
 		hoseData.set(namespacedKey, PersistentDataType.STRING, "item-type-" + itemConfigName);
 
-		//meta.addEnchant(Enchantment.PROTECTION_FIRE, 10, true);
-		meta.setDisplayName(ChatColor.RED + "§l" +this.pl.getConfig().getString("Equipment." + itemConfigName + ".displayName").replace("&", "§"));
+		meta.addEnchant(Enchantment.FIRE_PROTECTION, 1, true);
+		meta.setUnbreakable(true);
+
+		meta.setDisplayName(ChatColor.RED + "§l" + getConfigString("Equipment." + itemConfigName + ".displayName"));
 		meta.setLore(hoseLore);
 		hose.setItemMeta(meta);
 
