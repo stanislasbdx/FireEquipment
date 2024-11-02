@@ -68,4 +68,4 @@ tasks.register('copyJar', Copy) {
     from "build/libs/" + rootProject.name + "-" + version + ".jar"
     into 'J:/@MINECRAFT/SERV LOCAL DEV/plugins'
 }
-project.tasks["jar"].finalizedBy("copyJar")
+//project.tasks["jar"].finalizedBy("copyJar")
