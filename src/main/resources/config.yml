@@ -1,0 +1,35 @@
+Version: 0
+ConfigFix: true
+Prefix: FireEquipement
+ShortPrefix: "&6[&eFireEquip&6]"
+
+Core:
+  NoPerms: "You don't have the permission !"
+  Reload: "Config file reloaded !"
+  HelpMsg:
+    Help: "Need help ? Type /firequip help"
+    VersionHelp: "Plugin's version ? Type /firequip version"
+    ReloadHelp: "You need to reload the config without reloading your server ? /firequip reload"
+    DHelp: "Shows a help page"
+    DVersion: "Be able to know plugin's version"
+    DReload: "Reload the config file"
+    DGive: "Be able to give yourself an item"
+  GiveMsg:
+    Home: "What item do you need ?"
+    Hose: "You get an Fire Hose"
+    Pump: "You get a pump"
+    Extinguisher: "You get an extinguisher"
+
+Equipment:
+  Hose:
+    displayName: "Fire Hose"
+    usage: "Right-click to throw water"
+    range: 5
+  Pump:
+    displayName: "Water Pump"
+    usage: "Right-click to vacuum water"
+    range: 4
+  Extinguisher:
+    displayName: "Extinguisher"
+    usage: "Right-click to extinguish flames"
+    range: 2
