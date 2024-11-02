@@ -15,6 +15,8 @@ public class Config implements Listener {
 	String version = this.plugin.getDescription().getVersion();
 	String fileVersion = this.plugin.getConfig().getString("Version");
 
+	public static final String CONFIG_FIX_LITT = "ConfigFix";
+
 	private void versionUpdate() {
 		plugin.getConfig();
 
@@ -22,7 +24,7 @@ public class Config implements Listener {
 			plugin.getConfig().set("Version", version);
 			plugin.getServer().getConsoleSender().sendMessage("Config file 'config.yml' upgraded (" + fileVersion + " -> " + version + ") !");
 
-			plugin.getConfig().set("ConfigFix", Boolean.TRUE);
+			plugin.getConfig().set(CONFIG_FIX_LITT, Boolean.TRUE);
 			new Config();
 			plugin.saveConfig();
 		}
@@ -39,11 +41,11 @@ public class Config implements Listener {
 		headerStrings.add("Our Discord : https://discord.gg/DkQSQa7");
 		config.options().setHeader(headerStrings);
 
-		if(config.getBoolean("ConfigFix")) {
+		if(config.getBoolean(CONFIG_FIX_LITT)) {
 			config.options().copyDefaults(true);
 			config.options().parseComments(true);
 
-			config.set("ConfigFix", Boolean.FALSE);
+			config.set(CONFIG_FIX_LITT, Boolean.FALSE);
 
 			_log.debug("Config file 'config.yml' updated !");
 		}

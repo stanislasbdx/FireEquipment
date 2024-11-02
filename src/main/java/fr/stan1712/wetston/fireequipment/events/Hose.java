@@ -12,6 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
+
 public class Hose implements Listener {
 	private Main pl;
 
@@ -42,19 +44,17 @@ public class Hose implements Listener {
 						world.spawnParticle(Particle.FALLING_WATER, loc, 65);
 
 						double random = Math.random();
-						if(d >= 1) {
-							if(random >= 0.2) {
-								if(world.getBlockAt(loc).isEmpty() || world.getBlockAt(loc).getType().equals(Material.FIRE)) {
-									world.getBlockAt(loc).setType(Material.WATER);
-								}
-								else {
-									d = d + this.pl.getConfig().getInt("Equipment.Hose.range");
-								}
+						if(d >= 1 && random >= 0.2) {
+							if(world.getBlockAt(loc).isEmpty() || world.getBlockAt(loc).getType().equals(Material.FIRE)) {
+								world.getBlockAt(loc).setType(Material.WATER);
+							}
+							else {
+								d = d + this.pl.getConfig().getInt("Equipment.Hose.range");
 							}
 						}
 					}
 				} else {
-					player.sendMessage("[" + this.pl.getConfig().getString("Prefix").replace("&", "§") + "]" + this.pl.getConfig().getString("Core.NoPerms").replace("&", "§"));
+					player.sendMessage("[" + getConfigString("Prefix") + "]" + getConfigString("Core.NoPerms"));
 				}
 
 				event.setCancelled(true);

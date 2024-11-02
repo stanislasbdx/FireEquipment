@@ -9,12 +9,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
 
 public class GiveItem implements CommandExecutor {
 	private final Plugin pl;
-	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - GiveItem");
 
 	public GiveItem(Main pl) {
 		this.pl = pl;
@@ -62,16 +61,16 @@ public class GiveItem implements CommandExecutor {
 	}
 
 	private void sendItemsHelp(Player player) {
-		player.sendMessage(ChatColor.RED + "+----- ▲ " + this.pl.getConfig().getString("Prefix").replace("&", "§") + " ▲ -----+");
-		player.sendMessage(ChatColor.WHITE + "   " + this.pl.getConfig().getString("Core.GiveMsg.Home").replace("&", "§"));
-		player.sendMessage(ChatColor.WHITE + "» hose = " + this.pl.getConfig().getString("Equipment.Hose.displayName").replace("&", "§"));
-		player.sendMessage(ChatColor.WHITE + "» pump = " + this.pl.getConfig().getString("Equipment.Pump.displayName").replace("&", "§"));
-		player.sendMessage(ChatColor.WHITE + "» extinguisher = " + this.pl.getConfig().getString("Equipment.Extinguisher.displayName").replace("&", "§"));
+		player.sendMessage(ChatColor.RED + "+----- ▲ " + getConfigString("Prefix") + " ▲ -----+");
+		player.sendMessage(ChatColor.WHITE + "   " + getConfigString("Core.GiveMsg.Home"));
+		player.sendMessage(ChatColor.WHITE + "» hose = " + getConfigString("Equipment.Hose.displayName"));
+		player.sendMessage(ChatColor.WHITE + "» pump = " + getConfigString("Equipment.Pump.displayName"));
+		player.sendMessage(ChatColor.WHITE + "» extinguisher = " + getConfigString("Equipment.Extinguisher.displayName"));
 		player.sendMessage(ChatColor.RED + "+----- ----- ----- -----+");
 	}
 
 	private void giveItemToPlayer(ItemStack item, Player player, String path) {
 		player.getInventory().addItem(item);
-		player.sendMessage(ChatColor.WHITE + "» " + this.pl.getConfig().getString("Core.GiveMsg." + path).replace("&", "§"));
+		player.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.GiveMsg." + path));
 	}
 }

@@ -3,6 +3,7 @@ package fr.stan1712.wetston.fireequipment.defaults;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -11,10 +12,12 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 
+import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
+
 public class Items {
 	private Plugin pl;
 
-	private static NamespacedKey namespacedKey = null;
+	private NamespacedKey namespacedKey = null;
 
 	public Items(Plugin pl) {
 		this.pl = pl;
@@ -28,7 +31,7 @@ public class Items {
 		ItemMeta meta = hose.getItemMeta();
 
 		ArrayList<String> hoseLore = new ArrayList<>();
-		hoseLore.add(ChatColor.WHITE + "» " + this.pl.getConfig().getString("Equipment." + itemConfigName + ".usage").replace("&", "§"));
+		hoseLore.add(ChatColor.WHITE + "» " + getConfigString("Equipment." + itemConfigName + ".usage"));
 
 		assert meta != null;
 		PersistentDataContainer hoseData = meta.getPersistentDataContainer();

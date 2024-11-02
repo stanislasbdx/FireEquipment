@@ -9,6 +9,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
+import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
+
 public class FireEquipment implements CommandExecutor {
 	private final Plugin pl;
 
@@ -16,42 +18,44 @@ public class FireEquipment implements CommandExecutor {
 		this.pl = pl;
 	}
 
+	public static final String PREFIX_LITT = "Prefix";
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender.hasPermission("firequip.info")) {
 			if (args.length >= 1) {
 				if (args[0].equalsIgnoreCase("version")) {
-					sender.sendMessage(StrStructure.START_TITLE_BOX + this.pl.getConfig().getString("Prefix").replace("&", "§") + StrStructure.END_TITLE_BOX);
-					sender.sendMessage(ChatColor.WHITE + "» Version " + this.pl.getConfig().getString("Version").replace("&", "§"));
+					sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
+					sender.sendMessage(ChatColor.WHITE + "» Version " + getConfigString("Version"));
 					sender.sendMessage(StrStructure.BOTTOM_BOX);
 				} else if (args[0].equalsIgnoreCase("help")) {
-					sender.sendMessage(StrStructure.START_TITLE_BOX + this.pl.getConfig().getString("Prefix").replace("&", "§") + StrStructure.END_TITLE_BOX);
-					sender.sendMessage(ChatColor.WHITE + "» /firequip help = " + this.pl.getConfig().getString("Core.HelpMsg.DHelp").replace("&", "§"));
-					sender.sendMessage(ChatColor.WHITE + "» /firequip version = " + this.pl.getConfig().getString("Core.HelpMsg.DVersion").replace("&", "§"));
-					sender.sendMessage(ChatColor.WHITE + "» /firequip reload = " + this.pl.getConfig().getString("Core.HelpMsg.DReload").replace("&", "§"));
-					sender.sendMessage(ChatColor.WHITE + "» /equip <item> = " + this.pl.getConfig().getString("Core.HelpMsg.DGive").replace("&", "§"));
+					sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
+					sender.sendMessage(ChatColor.WHITE + "» /firequip help = " + getConfigString("Core.HelpMsg.DHelp"));
+					sender.sendMessage(ChatColor.WHITE + "» /firequip version = " + getConfigString("Core.HelpMsg.DVersion"));
+					sender.sendMessage(ChatColor.WHITE + "» /firequip reload = " + getConfigString("Core.HelpMsg.DReload"));
+					sender.sendMessage(ChatColor.WHITE + "» /equip <item> = " + getConfigString("Core.HelpMsg.DGive"));
 					sender.sendMessage(StrStructure.BOTTOM_BOX);
 				} else if (args[0].equalsIgnoreCase("reload")) {
 					if (sender.hasPermission("firequip.admin.reload")) {
 						new Config();
 						this.pl.saveConfig();
 
-						sender.sendMessage(StrStructure.START_TITLE_BOX + this.pl.getConfig().getString("Prefix").replace("&", "§") + StrStructure.END_TITLE_BOX);
-						sender.sendMessage(ChatColor.WHITE + "» " + this.pl.getConfig().getString("Core.Reload").replace("&", "§"));
+						sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
+						sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.Reload"));
 						sender.sendMessage(StrStructure.BOTTOM_BOX);
 					} else {
-						sender.sendMessage("[" + this.pl.getConfig().getString("Prefix").replace("&", "§") + "]" + this.pl.getConfig().getString("Core.NoPerms").replace("&", "§"));
+						sender.sendMessage("[" + getConfigString(PREFIX_LITT) + "]" + getConfigString("Core.NoPerms"));
 					}
 				}
 			} else {
-				sender.sendMessage(StrStructure.START_TITLE_BOX + this.pl.getConfig().getString("Prefix").replace("&", "§") + StrStructure.END_TITLE_BOX);
-				sender.sendMessage(ChatColor.WHITE + "» " + this.pl.getConfig().getString("Core.HelpMsg.Help").replace("&", "§"));
-				sender.sendMessage(ChatColor.WHITE + "» " + this.pl.getConfig().getString("Core.HelpMsg.VersionHelp").replace("&", "§"));
-				sender.sendMessage(ChatColor.WHITE + "» " + this.pl.getConfig().getString("Core.HelpMsg.ReloadHelp").replace("&", "§"));
+				sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
+				sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.Help"));
+				sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.VersionHelp"));
+				sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.ReloadHelp"));
 				sender.sendMessage(StrStructure.BOTTOM_BOX);
 			}
 		} else {
-			sender.sendMessage("[" + this.pl.getConfig().getString("Prefix").replace("&", "§") + "]" + this.pl.getConfig().getString("Core.NoPerms").replace("&", "§"));
+			sender.sendMessage("[" + getConfigString(PREFIX_LITT) + "]" + getConfigString("Core.NoPerms"));
 		}
 
 		return true;

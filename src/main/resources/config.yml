@@ -16,9 +16,9 @@ Core:
     DGive: "Be able to give yourself an item"
   GiveMsg:
     Home: "What item do you need ?"
-    Hose: "You get an Fire Hose"
-    Pump: "You get a pump"
-    Extinguisher: "You get an extinguisher"
+    Hose: "You got an fire hose"
+    Pump: "You got a pump"
+    Extinguisher: "You got an extinguisher"
 
 Equipment:
   Hose:

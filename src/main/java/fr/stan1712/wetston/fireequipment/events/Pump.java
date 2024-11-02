@@ -10,8 +10,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
+import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
+
 public class Pump implements Listener {
-	private Main pl;
+	private final Main pl;
 
 	public Pump(Main pl) {
 		this.pl = pl;
@@ -41,7 +43,7 @@ public class Pump implements Listener {
 						}
 					}
 				} else {
-					player.sendMessage("[" + this.pl.getConfig().getString("Prefix").replace("&", "§") + "]" + this.pl.getConfig().getString("Core.NoPerms").replace("&", "§"));
+					player.sendMessage("[" + getConfigString("Prefix") + "]" + getConfigString("Core.NoPerms"));
 				}
 			}
 		}
