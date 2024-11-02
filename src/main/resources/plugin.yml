@@ -1,0 +1,21 @@
+name: FireEquipment
+version: '${version}'
+main: fr.stan1712.wetston.fireequipment.Main
+api-version: '1.21'
+
+author: stan1712
+website: https://stan1712.com
+description: Roleplay Tools to enhance Firefigther gameplay in your server
+prefix: FireEquipment
+
+commands:
+  firequip:
+    description: Manage and get an overview of the plugin.
+    permission: firequip.info
+    usage: /firequip <help/version/reload>
+    aliases: [fireequipment]
+  fequip:
+    description: Gives you a firefighter tool.
+    permission: firequip.tools.give
+    usage: /fequip <item>
+    aliases: [equip]
