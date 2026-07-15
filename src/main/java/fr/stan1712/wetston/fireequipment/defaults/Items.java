@@ -12,7 +12,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 
-import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
+import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
 
 public class Items {
 	private Plugin pl;

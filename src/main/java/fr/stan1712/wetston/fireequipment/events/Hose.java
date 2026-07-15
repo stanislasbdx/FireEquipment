@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
+import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
 
 public class Hose implements Listener {
 	private Main pl;

@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
-import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
+import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
 
 public class GiveItem implements CommandExecutor {
 	private final Plugin pl;

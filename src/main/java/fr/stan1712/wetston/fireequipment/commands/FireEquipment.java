@@ -1,6 +1,6 @@
 package fr.stan1712.wetston.fireequipment.commands;
 
-import fr.stan1712.wetston.fireequipment.Config;
+import fr.stan1712.wetston.fireequipment.utils.Config;
 import fr.stan1712.wetston.fireequipment.Main;
 import fr.stan1712.wetston.fireequipment.defaults.StrStructure;
 import org.bukkit.ChatColor;
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
-import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
+import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
 
 public class FireEquipment implements CommandExecutor {
 	private final Plugin pl;

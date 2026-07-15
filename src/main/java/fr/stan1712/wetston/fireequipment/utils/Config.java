@@ -1,5 +1,6 @@
-package fr.stan1712.wetston.fireequipment;
+package fr.stan1712.wetston.fireequipment.utils;
 
+import fr.stan1712.wetston.fireequipment.Main;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;

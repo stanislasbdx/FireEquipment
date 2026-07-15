@@ -10,7 +10,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-import static fr.stan1712.wetston.fireequipment.Utils.ConfigFactory.getConfigString;
+import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
 
 public class Pump implements Listener {
 	private final Main pl;
