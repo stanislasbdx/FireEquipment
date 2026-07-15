@@ -33,7 +33,7 @@ public final class Main extends JavaPlugin {
 
 		final Pattern versionPattern = Pattern.compile("\\d[.]\\d+", Pattern.MULTILINE);
 		final Matcher versionMatcher = versionPattern.matcher(serverVersion);
-		if(!versionMatcher.find() || (!serverType.contains("Spigot") && !serverType.contains("Paper"))) {
+		if(!versionMatcher.find() || (!serverType.contains("Spigot") && !serverType.contains("Paper") && !serverType.contains("Purpur"))) {
 			_log.error("[{}] * Server type {} unknown, disabling plugin.", logStep, serverVersion);
 
 			pluginManager.disablePlugin(this);
