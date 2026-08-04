@@ -1,4 +1,4 @@
-package fr.stan1712.wetston.fireequipment;
+package fr.stan1712.wetston.fireequipment.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
