@@ -8,8 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
-
 import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
 
 public class Pump implements Listener {
@@ -26,9 +24,7 @@ public class Pump implements Listener {
 		Items items = new Items(this.pl);
 
 		if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			ItemStack pump = items.getPumpItem();
-
-			if(player.getInventory().getItemInMainHand().equals(pump)) {
+			if(items.isEquipment(player.getInventory().getItemInMainHand(), "Pump")) {
 				if(player.hasPermission("firequip.tools.pump")) {
 					Location loc = player.getEyeLocation();
 					World world = player.getWorld();
