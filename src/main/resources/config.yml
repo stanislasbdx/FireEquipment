@@ -25,11 +25,17 @@ Equipment:
     displayName: "Fire Hose"
     usage: "Right-click to throw water"
     range: 5
+    material: GOLDEN_HOE
+    custom-model-data: 1
   Pump:
     displayName: "Water Pump"
     usage: "Right-click to vacuum water"
     range: 4
+    material: CLAY_BALL
+    custom-model-data: 1
   Extinguisher:
     displayName: "Extinguisher"
     usage: "Right-click to extinguish flames"
     range: 2
+    material: IRON_HOE
+    custom-model-data: 1
