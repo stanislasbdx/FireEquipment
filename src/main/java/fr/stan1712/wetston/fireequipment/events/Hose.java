@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -28,9 +27,7 @@ public class Hose implements Listener {
 		Items items = new Items(this.pl);
 
 		if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			ItemStack hose = items.getHoseItem();
-
-			if(player.getInventory().getItemInMainHand().equals(hose)) {
+			if(items.isEquipment(player.getInventory().getItemInMainHand(), "Hose")) {
 				if(player.hasPermission("firequip.tools.hose")) {
 					Location loc = player.getEyeLocation();
 					World world = player.getWorld();

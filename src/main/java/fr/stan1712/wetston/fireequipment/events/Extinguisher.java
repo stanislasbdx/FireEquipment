@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -28,9 +27,7 @@ public class Extinguisher implements Listener {
 		Items items = new Items(this.pl);
 
 		if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			ItemStack extinguisher = items.getExtinguisherItem();
-
-			if(player.getInventory().getItemInMainHand().equals(extinguisher)) {
+			if(items.isEquipment(player.getInventory().getItemInMainHand(), "Extinguisher")) {
 				if(player.hasPermission("firequip.tools.extinguisher")) {
 					Location loc = player.getEyeLocation();
 					World world = player.getWorld();
@@ -38,7 +35,7 @@ public class Extinguisher implements Listener {
 
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 15, 1));
 
-					for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Hose.range"); d += 1){
+					for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Extinguisher.range"); d += 1){
 						loc.add(loc.getDirection());
 						world.playSound(loc, Sound.ENTITY_TNT_PRIMED, 3, 10);
 						world.spawnParticle(Particle.FALLING_WATER, loc, 4);
