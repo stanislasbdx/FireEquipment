@@ -26,13 +26,23 @@ Equipment:
     range: 5
     cooldown: 10
     waterLifetime: 60
+    itemModel: "fireequipment:hose"
   Pump:
     displayName: "Water Pump"
     usage: "Right-click to vacuum water"
     range: 4
     cooldown: 10
+    itemModel: "fireequipment:pump"
   Extinguisher:
     displayName: "Extinguisher"
     usage: "Right-click to extinguish flames"
     range: 2
     cooldown: 10
+    itemModel: "fireequipment:extinguisher"
+
+ResourcePack:
+  enabled: false
+  url: ""
+  sha1: ""
+  prompt: "FireEquipment textures"
+  force: false

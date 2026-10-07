@@ -38,11 +38,31 @@ Equipment:
 
 `range` is in blocks, `cooldown` and `waterLifetime` are in ticks. Messages accept legacy `&` colour codes and, on Paper, MiniMessage tags.
 
+## Resource pack
+
+The tools use the `item_model` component (`fireequipment:hose`, `fireequipment:pump`, `fireequipment:extinguisher`), so renaming an item or changing its texture does not affect them.
+The pack lives in `resourcepack/` and is built as `FireEquipment-pack-<version>.zip`. It is attached to every GitHub release together with the plugin jar, and it supports Minecraft 1.21.4 and newer (pack format 46 to 88).
+
+Tools given before the pack existed are updated automatically when their owner joins or uses them.
+
+To use your own models, change `Equipment.<Tool>.itemModel` in `config.yml` (empty means the vanilla look).
+To have the plugin send the pack to players on join, fill the `ResourcePack` section:
+
+```yaml
+ResourcePack:
+  enabled: true
+  url: "https://example.com/FireEquipment-pack-2.2.0.zip"
+  sha1: "<sha1 of the zip, printed by the build and written in the release notes>"
+  prompt: "FireEquipment textures"
+  force: false
+```
+
 ## Building
 
 ```
 ./gradlew build -x sonar
 ```
 
-The plugin jar is `build/libs/FireEquipment-<version>.jar` (bStats is shaded and relocated).
+The plugin jar is `build/libs/FireEquipment-<version>.jar` (bStats is shaded and relocated) and the resource pack is `build/resourcepack/FireEquipment-pack-<version>.zip`.
+Pushing a tag named like the version in `build.gradle` (for example `2.2.0`) builds both and attaches them to the GitHub release.
 Tests use JUnit 5 and MockBukkit.

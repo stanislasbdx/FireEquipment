@@ -47,6 +47,10 @@ public enum ToolType {
 		return "Equipment." + configKey + "." + field;
 	}
 
+	public String defaultItemModel() {
+		return "fireequipment:" + argument();
+	}
+
 	public String giveMessagePath() {
 		return "Core.GiveMsg." + configKey;
 	}

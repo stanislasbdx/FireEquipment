@@ -7,8 +7,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -39,7 +41,10 @@ public class ToolListener implements Listener {
 		if(event.getHand() != EquipmentSlot.HAND || (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK)) return;
 
 		final Player player = event.getPlayer();
-		final Optional<ToolType> type = items.identify(player.getInventory().getItemInMainHand());
+		final ItemStack held = player.getInventory().getItemInMainHand();
+		if(items.refresh(held)) player.getInventory().setItemInMainHand(held);
+
+		final Optional<ToolType> type = items.identify(held);
 		if(type.isEmpty() || !tools.containsKey(type.get())) return;
 
 		event.setCancelled(true);
@@ -53,6 +58,11 @@ public class ToolListener implements Listener {
 		if(!cooldowns.get(type.get()).tryUse(player.getUniqueId(), System.currentTimeMillis(), cooldownMillis)) return;
 
 		tools.get(type.get()).use(player);
+	}
+
+	@EventHandler
+	public void onJoin(PlayerJoinEvent event) {
+		items.refresh(event.getPlayer());
 	}
 
 	@EventHandler
