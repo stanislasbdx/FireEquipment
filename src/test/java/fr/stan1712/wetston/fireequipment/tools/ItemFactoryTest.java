@@ -75,4 +75,33 @@ class ItemFactoryTest {
 			assertEquals(Optional.of(type), items.identify(item));
 		}
 	}
+
+	@Test
+	void applyModelSetsTheConfiguredModel() {
+		for(ToolType type : ToolType.values()) {
+			final ItemMeta meta = new ItemStack(type.material()).getItemMeta();
+
+			assertTrue(items.needsModel(meta, type));
+			items.applyModel(meta, type);
+
+			assertEquals(type.defaultItemModel(), meta.getItemModel().asString());
+			assertFalse(items.needsModel(meta, type));
+		}
+	}
+
+	@Test
+	void refreshUpdatesLegacyItemsAndKeepsTheirTag() {
+		final ItemStack legacy = tagged(Material.GOLDEN_HOE, "item-type-Hose");
+
+		assertTrue(items.refresh(legacy));
+		assertEquals(Optional.of(ToolType.HOSE), items.identify(legacy));
+	}
+
+	@Test
+	void refreshIgnoresForeignItems() {
+		final ItemStack plain = new ItemStack(Material.GOLDEN_HOE);
+
+		assertFalse(items.refresh(plain));
+		assertFalse(plain.getItemMeta().hasItemModel());
+	}
 }
