@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 public final class Versions {
 	private static final Pattern GAME_VERSION = Pattern.compile("^(\\d+)\\.(\\d+)");
 	private static final int FIRST_YEAR_BASED_MAJOR = 26;
+	private static final int MIN_LEGACY_MINOR = 21;
 
 	private Versions() {
 		throw new IllegalStateException("Utility class");
@@ -13,7 +14,6 @@ public final class Versions {
 
 	public enum Support {
 		SUPPORTED,
-		PARTIAL,
 		UNSUPPORTED
 	}
 
@@ -28,10 +28,8 @@ public final class Versions {
 
 		if(major >= FIRST_YEAR_BASED_MAJOR) return Support.SUPPORTED;
 		if(major != 1) return Support.UNSUPPORTED;
-		if(minor >= 20) return Support.SUPPORTED;
-		if(minor >= 18) return Support.PARTIAL;
 
-		return Support.UNSUPPORTED;
+		return minor >= MIN_LEGACY_MINOR ? Support.SUPPORTED : Support.UNSUPPORTED;
 	}
 
 	public static boolean isServerTypeSupported(String serverName, String serverVersion) {

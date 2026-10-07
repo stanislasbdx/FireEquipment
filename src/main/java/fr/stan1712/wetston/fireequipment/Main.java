@@ -46,10 +46,6 @@ public final class Main extends JavaPlugin {
 				_log.info("[{}] Version check !", logStep);
 				_log.info("[{}] If you got issues, report them on Github", logStep);
 			}
-			case PARTIAL -> {
-				_log.info("[{}] {} may have issues while running !", logStep, minecraftVersion);
-				_log.info("[{}] If you got any, report them on Github", logStep);
-			}
 			default -> {
 				_log.error("[{}] * Version {} is not supported by {}, disabling plugin.", logStep, minecraftVersion, getName());
 

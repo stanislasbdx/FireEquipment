@@ -17,10 +17,10 @@ class VersionsTest {
 	@Test
 	void legacyVersionsAreClassified() {
 		assertEquals(Support.SUPPORTED, Versions.gameSupport("1.21.4"));
-		assertEquals(Support.SUPPORTED, Versions.gameSupport("1.20"));
-		assertEquals(Support.PARTIAL, Versions.gameSupport("1.19.4"));
-		assertEquals(Support.PARTIAL, Versions.gameSupport("1.18.2"));
-		assertEquals(Support.UNSUPPORTED, Versions.gameSupport("1.17.1"));
+		assertEquals(Support.SUPPORTED, Versions.gameSupport("1.21"));
+		assertEquals(Support.UNSUPPORTED, Versions.gameSupport("1.20.6"));
+		assertEquals(Support.UNSUPPORTED, Versions.gameSupport("1.19.4"));
+		assertEquals(Support.UNSUPPORTED, Versions.gameSupport("1.18.2"));
 	}
 
 	@Test
