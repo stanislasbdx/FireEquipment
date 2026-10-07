@@ -115,7 +115,7 @@ public final class Main extends JavaPlugin {
 	}
 
 	private void logNewStep(String step) {
-		_log.info("{@ {}} ---", step);
+		_log.info("--- {} ---", step);
 	}
 
 	@Override
