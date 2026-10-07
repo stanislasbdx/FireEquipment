@@ -35,7 +35,7 @@ public class Extinguisher implements Listener {
 
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 15, 1));
 
-					for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Hose.range"); d += 1){
+					for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Extinguisher.range"); d += 1){
 						loc.add(loc.getDirection());
 						world.playSound(loc, Sound.ENTITY_TNT_PRIMED, 3, 10);
 						world.spawnParticle(Particle.FALLING_WATER, loc, 4);
