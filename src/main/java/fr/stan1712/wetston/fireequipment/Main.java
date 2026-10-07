@@ -64,7 +64,7 @@ public final class Main extends JavaPlugin {
 	private void updateCheck() {
 		final String logStep = "updateCheck";
 		new UpdateChecker(this, SPIGOT_PLUGIN_ID).getVersion(version -> {
-			if(!this.getDescription().getVersion().equalsIgnoreCase(version)) {
+			if(Versions.compare(version, this.getDescription().getVersion()) > 0) {
 				_log.info("[{}] An update is available on Spigot ! ({})", logStep, version);
 			}
 		});
