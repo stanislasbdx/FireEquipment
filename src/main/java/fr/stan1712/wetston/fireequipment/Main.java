@@ -5,6 +5,9 @@ import fr.stan1712.wetston.fireequipment.commands.GiveItem;
 import fr.stan1712.wetston.fireequipment.events.Extinguisher;
 import fr.stan1712.wetston.fireequipment.events.Hose;
 import fr.stan1712.wetston.fireequipment.events.Pump;
+import fr.stan1712.wetston.fireequipment.utils.Config;
+import fr.stan1712.wetston.fireequipment.utils.Metrics;
+import fr.stan1712.wetston.fireequipment.utils.UpdateChecker;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,7 +18,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Main extends JavaPlugin {
+public final class Main extends JavaPlugin {
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Core");
 	public final PluginManager pluginManager = getServer().getPluginManager();
 
