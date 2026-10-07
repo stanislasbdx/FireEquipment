@@ -3,6 +3,7 @@ package fr.stan1712.wetston.fireequipment.events;
 import fr.stan1712.wetston.fireequipment.Main;
 import fr.stan1712.wetston.fireequipment.defaults.Items;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,8 +35,9 @@ public class Pump implements Listener {
 						world.playSound(loc, Sound.BLOCK_LAVA_EXTINGUISH, (float) 0.5, -2);
 						world.spawnParticle(Particle.ASH, loc, 10);
 
-						if(world.getBlockAt(loc).getType() == Material.WATER) {
-							world.getBlockAt(loc).setType(Material.AIR);
+						final Block block = world.getBlockAt(loc);
+						if(block.getType() == Material.WATER && ToolSupport.canBreak(player, block)) {
+							block.setType(Material.AIR);
 						}
 					}
 				} else {

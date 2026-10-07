@@ -3,6 +3,7 @@ package fr.stan1712.wetston.fireequipment.events;
 import fr.stan1712.wetston.fireequipment.Main;
 import fr.stan1712.wetston.fireequipment.defaults.Items;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -40,8 +41,9 @@ public class Extinguisher implements Listener {
 						world.spawnParticle(Particle.FALLING_WATER, loc, 4);
 
 						double random = Math.random();
-						if(d >= 1 && random >= 0.5 && world.getBlockAt(loc).getType().equals(Material.FIRE)) {
-							world.getBlockAt(loc).setType(Material.AIR);
+						final Block block = world.getBlockAt(loc);
+						if(d >= 1 && random >= 0.5 && block.getType().equals(Material.FIRE) && ToolSupport.canBreak(player, block)) {
+							block.setType(Material.AIR);
 						}
 					}
 				} else {
