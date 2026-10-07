@@ -25,12 +25,15 @@ Equipment:
     displayName: "Fire Hose"
     usage: "Right-click to throw water"
     range: 5
+    cooldown: 10
     waterLifetime: 60
   Pump:
     displayName: "Water Pump"
     usage: "Right-click to vacuum water"
     range: 4
+    cooldown: 10
   Extinguisher:
     displayName: "Extinguisher"
     usage: "Right-click to extinguish flames"
     range: 2
+    cooldown: 10

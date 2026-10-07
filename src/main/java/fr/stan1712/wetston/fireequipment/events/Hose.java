@@ -2,6 +2,7 @@ package fr.stan1712.wetston.fireequipment.events;
 
 import fr.stan1712.wetston.fireequipment.Main;
 import fr.stan1712.wetston.fireequipment.defaults.Items;
+import fr.stan1712.wetston.fireequipment.utils.Cooldowns;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -21,6 +22,7 @@ public class Hose implements Listener {
 	private static final long DEFAULT_WATER_LIFETIME = 60L;
 
 	private final Set<Block> placedWater = new HashSet<>();
+	private final Cooldowns cooldowns = new Cooldowns();
 	private Main pl;
 
 	public Hose(Main pl) {
@@ -36,6 +38,12 @@ public class Hose implements Listener {
 		if(ToolSupport.isMainHandRightClick(event)) {
 			if(Items.HOSE.equals(items.identify(player.getInventory().getItemInMainHand()))) {
 				if(player.hasPermission("firequip.tools.hose")) {
+					final long cooldownMillis = this.pl.getConfig().getLong("Equipment.Hose.cooldown", 10L) * 50L;
+					if(!cooldowns.tryUse(player.getUniqueId(), System.currentTimeMillis(), cooldownMillis)) {
+						event.setCancelled(true);
+						return;
+					}
+
 					Location loc = player.getEyeLocation();
 					World world = player.getWorld();
 
@@ -44,8 +52,8 @@ public class Hose implements Listener {
 					for(double d = 0; d <= this.pl.getConfig().getInt("Equipment.Hose.range"); d += 1){
 						loc.add(loc.getDirection());
 						world.playSound(loc, Sound.ENTITY_DOLPHIN_SPLASH, 5, 5);
-						world.spawnParticle(Particle.SPLASH, loc, 100);
-						world.spawnParticle(Particle.FALLING_WATER, loc, 65);
+						world.spawnParticle(Particle.SPLASH, loc, 20);
+						world.spawnParticle(Particle.FALLING_WATER, loc, 10);
 
 						double random = Math.random();
 						if(d >= 1 && random >= 0.2) {

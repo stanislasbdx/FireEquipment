@@ -2,6 +2,7 @@ package fr.stan1712.wetston.fireequipment.events;
 
 import fr.stan1712.wetston.fireequipment.Main;
 import fr.stan1712.wetston.fireequipment.defaults.Items;
+import fr.stan1712.wetston.fireequipment.utils.Cooldowns;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -12,6 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
 
 public class Pump implements Listener {
+	private final Cooldowns cooldowns = new Cooldowns();
 	private final Main pl;
 
 	public Pump(Main pl) {
@@ -27,6 +29,12 @@ public class Pump implements Listener {
 		if(ToolSupport.isMainHandRightClick(event)) {
 			if(Items.PUMP.equals(items.identify(player.getInventory().getItemInMainHand()))) {
 				if(player.hasPermission("firequip.tools.pump")) {
+					final long cooldownMillis = this.pl.getConfig().getLong("Equipment.Pump.cooldown", 10L) * 50L;
+					if(!cooldowns.tryUse(player.getUniqueId(), System.currentTimeMillis(), cooldownMillis)) {
+						event.setCancelled(true);
+						return;
+					}
+
 					Location loc = player.getEyeLocation();
 					World world = player.getWorld();
 
