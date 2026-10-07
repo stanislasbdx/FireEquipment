@@ -15,6 +15,12 @@ import java.util.ArrayList;
 import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
 
 public class Items {
+	public static final String HOSE = "Hose";
+	public static final String PUMP = "Pump";
+	public static final String EXTINGUISHER = "Extinguisher";
+
+	private static final String TYPE_PREFIX = "item-type-";
+
 	private Plugin pl;
 
 	private NamespacedKey namespacedKey = null;
@@ -36,7 +42,7 @@ public class Items {
 		assert meta != null;
 		PersistentDataContainer hoseData = meta.getPersistentDataContainer();
 
-		hoseData.set(namespacedKey, PersistentDataType.STRING, "item-type-" + itemConfigName);
+		hoseData.set(namespacedKey, PersistentDataType.STRING, TYPE_PREFIX + itemConfigName);
 
 		meta.addEnchant(Enchantment.FIRE_PROTECTION, 1, true);
 		meta.setUnbreakable(true);
@@ -48,15 +54,24 @@ public class Items {
 		return hose;
 	}
 
+	public String identify(ItemStack item) {
+		if(item == null || !item.hasItemMeta()) return null;
+
+		final String value = item.getItemMeta().getPersistentDataContainer().get(namespacedKey, PersistentDataType.STRING);
+		if(value == null || !value.startsWith(TYPE_PREFIX)) return null;
+
+		return value.substring(TYPE_PREFIX.length());
+	}
+
 	public ItemStack getHoseItem() {
-		return makeNewItem(Material.GOLDEN_HOE, "Hose");
+		return makeNewItem(Material.GOLDEN_HOE, HOSE);
 	}
 
 	public ItemStack getPumpItem() {
-		return makeNewItem(Material.CLAY_BALL, "Pump");
+		return makeNewItem(Material.CLAY_BALL, PUMP);
 	}
 
 	public ItemStack getExtinguisherItem() {
-		return makeNewItem(Material.IRON_HOE, "Extinguisher");
+		return makeNewItem(Material.IRON_HOE, EXTINGUISHER);
 	}
 }
