@@ -6,7 +6,6 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -26,7 +25,7 @@ public class Extinguisher implements Listener {
 		Player player = event.getPlayer();
 		Items items = new Items(this.pl);
 
-		if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+		if(ToolSupport.isMainHandRightClick(event)) {
 			if(Items.EXTINGUISHER.equals(items.identify(player.getInventory().getItemInMainHand()))) {
 				if(player.hasPermission("firequip.tools.extinguisher")) {
 					Location loc = player.getEyeLocation();
