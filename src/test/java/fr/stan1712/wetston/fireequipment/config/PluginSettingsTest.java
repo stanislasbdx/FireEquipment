@@ -36,6 +36,28 @@ class PluginSettingsTest {
 	}
 
 	@Test
+	void readsItemModels() {
+		final YamlConfiguration config = new YamlConfiguration();
+		config.set("Equipment.Hose.itemModel", "MyPack:Custom_Hose");
+		config.set("Equipment.Pump.itemModel", "");
+		config.set("Equipment.Extinguisher.itemModel", "not a key");
+
+		final PluginSettings.Values values = PluginSettings.read(config);
+
+		assertEquals("mypack:custom_hose", values.tools().get(ToolType.HOSE).itemModel().asString());
+		assertNull(values.tools().get(ToolType.PUMP).itemModel());
+		assertNull(values.tools().get(ToolType.EXTINGUISHER).itemModel());
+	}
+
+	@Test
+	void defaultsItemModelsToThePackNamespace() {
+		final PluginSettings.Values values = PluginSettings.read(new YamlConfiguration());
+
+		assertEquals("fireequipment:hose", values.tools().get(ToolType.HOSE).itemModel().asString());
+		assertEquals("fireequipment:extinguisher", values.tools().get(ToolType.EXTINGUISHER).itemModel().asString());
+	}
+
+	@Test
 	void clampsInvalidValues() {
 		final YamlConfiguration config = new YamlConfiguration();
 		config.set("Equipment.Pump.range", -3);
