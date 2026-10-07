@@ -16,6 +16,7 @@ RAMPS = {
 	"white": [(138, 142, 156), (180, 184, 196), (214, 217, 226), (238, 240, 244), (252, 252, 252)],
 	"blue": [(12, 28, 92), (22, 50, 146), (34, 76, 194), (58, 108, 226), (108, 158, 246), (188, 218, 255)],
 	"water": [(36, 96, 176), (66, 138, 220), (118, 184, 244), (182, 226, 255), (238, 250, 255)],
+	"yellow": [(96, 70, 0), (150, 112, 0), (206, 160, 8), (244, 200, 20), (255, 226, 70), (255, 244, 160)],
 	"green": [(14, 70, 30), (24, 112, 46), (46, 160, 70), (110, 210, 120)],
 }
 
@@ -147,40 +148,49 @@ class Canvas:
 		return img
 
 
+def dashes(c, x0, x1, y, ramp, level, dash=2.0, gap=1.0):
+	x = x0
+	while x < x1:
+		c.rect_flat(x, y, min(x + dash, x1), y + 0.9, ramp, level)
+		x += dash + gap
+
+
 def extinguisher():
 	c = Canvas()
-	cx = 30
-	c.disc((cx, 46), 12, "red", 0.12)
-	c.disc((cx, 34), 12, "red", 0.12)
-	c.tube((cx, 34), (cx, 46), 12, 12, "red", 0.14, "flat")
-	c.box(cx - 13, 55, cx + 13, 60, "rubber", 2.0, 2.0, 0.05)
-	c.tube((cx, 20), (cx, 26), 4.5, 4.5, "steel", 0.25, "flat")
-	c.tube((cx, 33), (cx, 47), 9.5, 9.5, "white", 0.06, "flat")
-	band = c.seq + 1
-	c.rect_flat(cx - 9, 34, cx - 3, 38, "blue", 3)
-	c.rect_flat(cx - 3, 34, cx + 3, 38, "white", 4)
-	c.rect_flat(cx + 3, 34, cx + 9, 38, "red", 3)
-	c.poly([(cx, 40), (cx + 3, 44), (cx + 1, 46), (cx - 1, 46), (cx - 3, 44)], "red", 3)
-	c.poly([(cx, 42), (cx + 1.5, 44.5), (cx, 45.5), (cx - 1.5, 44.5)], "brass", 4)
-	c.rect_flat(cx - 8, 39, cx - 4, 39.9, "rubber", 2)
-	c.rect_flat(cx - 8, 41, cx - 5, 41.9, "rubber", 2)
-	c.rect_flat(cx + 4, 39, cx + 8, 39.9, "rubber", 2)
-	c.rect_flat(cx + 4, 41, cx + 7, 41.9, "rubber", 2)
-	c.box(cx - 9, 9, cx + 9, 21, "brass", 3.0, 3.0, 0.22)
-	c.tube((cx - 12, 9), (cx - 2, 4), 1.8, 1.8, "steel", 0.3)
-	c.tube((cx + 2, 10), (cx + 14, 14), 1.8, 1.8, "steel", 0.3)
-	c.disc((cx, 15), 4.6, "steel", 0.3)
-	c.disc((cx, 15), 3.5, "white", 0.0)
-	c.rect_flat(cx - 3, 15.5, cx - 0.5, 17, "green", 2)
-	c.rect_flat(cx + 0.5, 15.5, cx + 3, 17, "red", 3)
-	c.tube((cx, 15), (cx + 1.5, 12.6), 0.5, 0.5, "rubber", 0.0)
-	c.ring((cx + 17, 19), 3.2, 1.0, "brass", 0.3)
-	c.tube((cx + 12, 13), (cx + 15, 17), 0.8, 0.8, "steel", 0.2)
-	c.tube((cx + 9, 17), (cx + 17, 17), 2.2, 2.2, "rubber", 0.15)
-	c.tube((cx + 17, 17), (cx + 21, 27), 2.2, 2.2, "rubber", 0.15)
-	c.tube((cx + 21, 27), (cx + 21, 40), 2.2, 2.2, "rubber", 0.15)
-	c.tube((cx + 21, 40), (cx + 18, 48), 2.2, 2.2, "rubber", 0.15)
-	c.tube((cx + 18, 48), (cx + 14, 54), 3.4, 2.4, "steel", 0.3)
+	cx = 29
+	c.disc((cx, 28), 12, "red", 0.14)
+	c.tube((cx, 28), (cx, 55), 12, 12, "red", 0.16, "flat")
+	c.box(cx - 12, 54, cx + 12, 58.5, "rubber", 1.5, 2.0, 0.15)
+	c.tube((cx, 15), (cx, 19), 4.0, 4.0, "steel", 0.3, "flat")
+	c.tube((cx, 18.5), (cx, 21.5), 6.8, 6.8, "rubber", 0.2, "flat")
+	c.tube((cx, 30), (cx, 52), 9.5, 9.5, "white", 0.05, "flat")
+	c.rect_flat(cx - 8, 31, cx + 8, 35.5, "white", 4)
+	c.rect_flat(cx - 8, 31, cx + 8, 31.8, "red", 3)
+	c.rect_flat(cx - 8, 35.2, cx + 8, 36, "red", 3)
+	dashes(c, cx - 6.5, cx + 6.5, 32.6, "red", 2, 2.2, 0.8)
+	dashes(c, cx - 6.5, cx + 6.5, 34.0, "red", 2, 2.2, 0.8)
+	for i, y in enumerate((38.2, 41.4)):
+		c.disc((cx - 6.5, y + 0.6), 1.1, "blue", 0.0)
+		dashes(c, cx - 4, cx + 7, y, "rubber", 3, 2.4, 0.8)
+		dashes(c, cx - 4, cx + 5 - i * 1.5, y + 1.3, "rubber", 3, 2.4, 0.8)
+	c.rect_flat(cx - 7, 45.5, cx - 2.5, 50.5, "white", 3)
+	c.rect_flat(cx - 7, 45.5, cx - 2.5, 46.2, "red", 2)
+	c.disc((cx - 4.75, 48.4), 1.1, "rubber", 0.0)
+	c.rect_flat(cx - 1.5, 45.5, cx + 3, 50.5, "red", 3)
+	c.poly([(cx + 0.75, 46.5), (cx + 2.1, 48.4), (cx + 0.75, 49.8), (cx - 0.6, 48.4)], "white", 4)
+	c.rect_flat(cx + 4, 45.5, cx + 8.5, 50.5, "blue", 3)
+	c.disc((cx + 6.25, 48.2), 1.2, "white", 0.0)
+	c.box(cx - 6.5, 8.5, cx + 6.5, 16.5, "rubber", 3.0, 3.0, 0.25)
+	c.tube((cx - 3, 7.5), (cx + 15, 9.5), 1.9, 1.9, "yellow", 0.3)
+	c.ring((cx - 9.5, 12.5), 2.5, 0.8, "steel", 0.4)
+	c.tube((cx - 7, 11.8), (cx - 4.5, 11), 0.7, 0.7, "steel", 0.3)
+	c.tube((cx + 5, 13.5), (cx + 9, 13.5), 2.8, 2.8, "brass", 0.35, "flat")
+	c.tube((cx + 9, 13.5), (cx + 19, 13.5), 2.0, 2.0, "rubber", 0.2)
+	c.tube((cx + 19, 13.5), (cx + 23, 21), 2.0, 2.0, "rubber", 0.2)
+	c.tube((cx + 23, 21), (cx + 23, 40), 2.0, 2.0, "rubber", 0.2)
+	c.tube((cx + 23, 40), (cx + 19, 47), 2.0, 2.0, "rubber", 0.2)
+	c.tube((cx + 19, 47), (cx + 15, 54), 3.4, 2.2, "rubber", 0.25)
+	c.tube((cx + 19, 47), (cx + 17.6, 49.5), 4.0, 4.0, "steel", 0.4, "flat")
 	return c.image()
 
 
