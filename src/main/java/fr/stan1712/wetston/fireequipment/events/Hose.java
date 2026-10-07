@@ -45,7 +45,7 @@ public class Hose implements Listener {
 								world.getBlockAt(loc).setType(Material.WATER);
 							}
 							else {
-								d = d + this.pl.getConfig().getInt("Equipment.Hose.range");
+								break;
 							}
 						}
 					}
