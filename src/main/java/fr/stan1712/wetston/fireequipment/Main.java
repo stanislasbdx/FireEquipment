@@ -8,6 +8,8 @@ import fr.stan1712.wetston.fireequipment.events.Pump;
 import fr.stan1712.wetston.fireequipment.utils.Config;
 import fr.stan1712.wetston.fireequipment.utils.Metrics;
 import fr.stan1712.wetston.fireequipment.utils.UpdateChecker;
+import fr.stan1712.wetston.fireequipment.utils.Versions;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,8 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class Main extends JavaPlugin {
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Core");
@@ -28,30 +28,28 @@ public final class Main extends JavaPlugin {
 		final String logStep = "versionCheck";
 		final String serverVersion = getServer().getVersion();
 		final String serverType = getServer().getName();
+		final String minecraftVersion = Bukkit.getBukkitVersion();
 
-		_log.info("[{}] Checking server version : {} {}", logStep, serverType, serverVersion);
+		_log.info("[{}] Checking server version : {} {} (API {})", logStep, serverType, serverVersion, minecraftVersion);
 
-		final Pattern versionPattern = Pattern.compile("\\d[.]\\d+", Pattern.MULTILINE);
-		final Matcher versionMatcher = versionPattern.matcher(serverVersion);
-		if(!versionMatcher.find() || (!serverType.contains("Spigot") && !serverType.contains("Paper") && !serverType.contains("Purpur"))) {
-			_log.error("[{}] * Server type {} unknown, disabling plugin.", logStep, serverVersion);
+		if(!Versions.isServerTypeSupported(serverType, serverVersion)) {
+			_log.error("[{}] * Server type {} unknown, disabling plugin.", logStep, serverType);
 
 			pluginManager.disablePlugin(this);
 			return false;
 		}
-		final String version = versionMatcher.group();
 
-		switch (version) {
-			case "1.21", "1.20" -> {
+		switch (Versions.gameSupport(minecraftVersion)) {
+			case SUPPORTED -> {
 				_log.info("[{}] Version check !", logStep);
 				_log.info("[{}] If you got issues, report them on Github", logStep);
 			}
-			case "1.19", "1.18" -> {
-				_log.info("[{}] {} may have issues while running !", logStep, version);
+			case PARTIAL -> {
+				_log.info("[{}] {} may have issues while running !", logStep, minecraftVersion);
 				_log.info("[{}] If you got any, report them on Github", logStep);
 			}
 			default -> {
-				_log.error("[{}] * Version {} is not supported by {}, disabling plugin.", logStep, serverVersion, getName());
+				_log.error("[{}] * Version {} is not supported by {}, disabling plugin.", logStep, minecraftVersion, getName());
 
 				pluginManager.disablePlugin(this);
 				return false;
