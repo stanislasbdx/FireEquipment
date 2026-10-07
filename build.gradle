@@ -1,6 +1,7 @@
 plugins {
     id 'java'
-    id "org.sonarqube" version "5.1.0.4882"
+    id "org.sonarqube" version "6.3.1.5724"
+    id "com.gradleup.shadow" version "9.6.1"
 }
 
 group = 'fr.stan1712.wetston'
@@ -32,11 +33,30 @@ sonar {
 project.tasks["sonar"].dependsOn("test", "build")
 
 dependencies {
-    compileOnly "org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT"
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.16'
+    compileOnly "org.spigotmc:spigot-api:26.2-R0.1-SNAPSHOT"
+    compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '2.0.16'
 
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.46'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.46'
+    implementation 'org.bstats:bstats-bukkit:3.2.1'
+
+    compileOnly 'net.kyori:adventure-api:4.26.1'
+    compileOnly 'net.kyori:adventure-text-minimessage:4.26.1'
+
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+    testImplementation 'org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.116.3'
+}
+
+repositories {
+    maven {
+        name = 'papermc'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 def targetJavaVersion = 21
@@ -57,6 +77,19 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+jar {
+    archiveClassifier = 'plain'
+}
+
+shadowJar {
+    archiveClassifier = ''
+    relocate 'org.bstats', 'fr.stan1712.wetston.fireequipment.libs.bstats'
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('shadowJar')
 }
 
 tasks.register('copyJar', Copy) {
