@@ -11,9 +11,16 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
 
 public class Hose implements Listener {
+	private static final long DEFAULT_WATER_LIFETIME = 60L;
+
+	private final Set<Block> placedWater = new HashSet<>();
 	private Main pl;
 
 	public Hose(Main pl) {
@@ -47,6 +54,7 @@ public class Hose implements Listener {
 								if(!ToolSupport.canPlace(player, block)) break;
 
 								block.setType(Material.WATER);
+								scheduleWaterRemoval(block);
 							}
 							else {
 								break;
@@ -60,5 +68,22 @@ public class Hose implements Listener {
 				event.setCancelled(true);
 			}
 		}
+	}
+
+	private void scheduleWaterRemoval(Block block) {
+		placedWater.add(block);
+
+		final long lifetime = this.pl.getConfig().getLong("Equipment.Hose.waterLifetime", DEFAULT_WATER_LIFETIME);
+		Bukkit.getScheduler().runTaskLater(this.pl, () -> removeWater(block), lifetime);
+	}
+
+	private void removeWater(Block block) {
+		if(placedWater.remove(block) && block.getType() == Material.WATER) {
+			block.setType(Material.AIR);
+		}
+	}
+
+	public void removeAllWater() {
+		new ArrayList<>(placedWater).forEach(this::removeWater);
 	}
 }

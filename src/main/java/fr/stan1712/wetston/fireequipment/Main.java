@@ -24,6 +24,8 @@ public final class Main extends JavaPlugin {
 
 	public static final int SPIGOT_PLUGIN_ID = 69199;
 
+	private Hose hose;
+
 	public boolean versionCheck() {
 		final String logStep = "versionCheck";
 		final String serverVersion = getServer().getVersion();
@@ -103,7 +105,8 @@ public final class Main extends JavaPlugin {
 	private void loadEvents() {
 		final String logStep = "loadEvents";
 
-		pluginManager.registerEvents(new Hose(this), this);
+		hose = new Hose(this);
+		pluginManager.registerEvents(hose, this);
 		_log.info("[{}] Hose event loaded", logStep);
 		pluginManager.registerEvents(new Pump(this), this);
 		_log.info("[{}] Pump event loaded", logStep);
@@ -136,5 +139,10 @@ public final class Main extends JavaPlugin {
 			logNewStep("loadEvents");
 			loadEvents();
 		}
+	}
+
+	@Override
+	public void onDisable() {
+		if(hose != null) hose.removeAllWater();
 	}
 }
