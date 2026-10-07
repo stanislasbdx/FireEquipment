@@ -32,7 +32,7 @@ public class FireEquipment implements CommandExecutor {
 					sender.sendMessage(ChatColor.WHITE + "» /firequip help = " + getConfigString("Core.HelpMsg.DHelp"));
 					sender.sendMessage(ChatColor.WHITE + "» /firequip version = " + getConfigString("Core.HelpMsg.DVersion"));
 					sender.sendMessage(ChatColor.WHITE + "» /firequip reload = " + getConfigString("Core.HelpMsg.DReload"));
-					sender.sendMessage(ChatColor.WHITE + "» /equip <item> = " + getConfigString("Core.HelpMsg.DGive"));
+					sender.sendMessage(ChatColor.WHITE + "» /fequip <item> = " + getConfigString("Core.HelpMsg.DGive"));
 					sender.sendMessage(StrStructure.BOTTOM_BOX);
 				} else if (args[0].equalsIgnoreCase("reload")) {
 					if (sender.hasPermission("firequip.admin.reload")) {

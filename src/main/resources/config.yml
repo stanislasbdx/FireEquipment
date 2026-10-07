@@ -1,6 +1,6 @@
 Version: 0
 ConfigFix: true
-Prefix: FireEquipement
+Prefix: FireEquipment
 ShortPrefix: "&6[&eFireEquip&6]"
 
 Core:
@@ -16,7 +16,7 @@ Core:
     DGive: "Be able to give yourself an item"
   GiveMsg:
     Home: "What item do you need ?"
-    Hose: "You got an fire hose"
+    Hose: "You got a fire hose"
     Pump: "You got a pump"
     Extinguisher: "You got an extinguisher"
 
