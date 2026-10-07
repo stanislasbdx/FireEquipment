@@ -3,8 +3,6 @@ package fr.stan1712.wetston.fireequipment.utils;
 import fr.stan1712.wetston.fireequipment.Main;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.Objects;
-
 public class Utils {
 	private Utils() {
 		throw new IllegalStateException("Utility class");
@@ -20,7 +18,9 @@ public class Utils {
 		}
 
 		public static String getConfigString(String path) {
-			return Objects.requireNonNull(config().getString(path)).replace("&", "§");
+			final String value = config().getString(path);
+
+			return value == null ? path : value.replace("&", "§");
 		}
 		public static Boolean getConfigBoolean(String path) {
 			return config().getBoolean(path);
