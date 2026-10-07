@@ -20,7 +20,7 @@ public final class PluginSettings {
 		}
 	}
 
-	public record Values(String prefix, Map<ToolType, ToolSettings> tools, int hoseWaterLifetimeTicks) {
+	public record Values(String prefix, Map<ToolType, ToolSettings> tools, int hoseWaterLifetimeTicks, ResourcePackSettings resourcePack) {
 	}
 
 	private final Plugin plugin;
@@ -48,6 +48,10 @@ public final class PluginSettings {
 		return values.hoseWaterLifetimeTicks();
 	}
 
+	public ResourcePackSettings resourcePack() {
+		return values.resourcePack();
+	}
+
 	private static NamespacedKey parseModel(String raw) {
 		if(raw == null || raw.isBlank()) return null;
 
@@ -70,7 +74,8 @@ public final class PluginSettings {
 		return new Values(
 			config.getString("Prefix", DEFAULT_PREFIX),
 			tools,
-			Math.max(1, config.getInt(ToolType.HOSE.configPath("waterLifetime"), DEFAULT_WATER_LIFETIME_TICKS))
+			Math.max(1, config.getInt(ToolType.HOSE.configPath("waterLifetime"), DEFAULT_WATER_LIFETIME_TICKS)),
+			ResourcePackSettings.read(config)
 		);
 	}
 }

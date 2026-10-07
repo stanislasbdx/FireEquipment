@@ -39,3 +39,10 @@ Equipment:
     range: 2
     cooldown: 10
     itemModel: "fireequipment:extinguisher"
+
+ResourcePack:
+  enabled: false
+  url: ""
+  sha1: ""
+  prompt: "FireEquipment textures"
+  force: false
