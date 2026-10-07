@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id "org.sonarqube" version "6.3.1.5724"
+    id "com.gradleup.shadow" version "9.6.1"
 }
 
 group = 'fr.stan1712.wetston'
@@ -34,6 +35,8 @@ project.tasks["sonar"].dependsOn("test", "build")
 dependencies {
     compileOnly "org.spigotmc:spigot-api:26.2-R0.1-SNAPSHOT"
     compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '2.0.16'
+
+    implementation 'org.bstats:bstats-bukkit:3.2.1'
 
     compileOnly 'net.kyori:adventure-api:4.26.1'
     compileOnly 'net.kyori:adventure-text-minimessage:4.26.1'
@@ -74,6 +77,19 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+jar {
+    archiveClassifier = 'plain'
+}
+
+shadowJar {
+    archiveClassifier = ''
+    relocate 'org.bstats', 'fr.stan1712.wetston.fireequipment.libs.bstats'
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('shadowJar')
 }
 
 tasks.register('copyJar', Copy) {
