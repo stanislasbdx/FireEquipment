@@ -1,6 +1,5 @@
 package fr.stan1712.wetston.fireequipment.commands;
 
-import fr.stan1712.wetston.fireequipment.utils.Config;
 import fr.stan1712.wetston.fireequipment.Main;
 import fr.stan1712.wetston.fireequipment.defaults.StrStructure;
 import org.bukkit.ChatColor;
@@ -37,8 +36,7 @@ public class FireEquipment implements CommandExecutor {
 					sender.sendMessage(StrStructure.BOTTOM_BOX);
 				} else if (args[0].equalsIgnoreCase("reload")) {
 					if (sender.hasPermission("firequip.admin.reload")) {
-						new Config();
-						this.pl.saveConfig();
+						this.pl.reloadConfig();
 
 						sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
 						sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.Reload"));
