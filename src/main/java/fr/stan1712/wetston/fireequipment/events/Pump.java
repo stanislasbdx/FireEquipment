@@ -34,7 +34,7 @@ public class Pump implements Listener {
 						world.playSound(loc, Sound.BLOCK_LAVA_EXTINGUISH, (float) 0.5, -2);
 						world.spawnParticle(Particle.ASH, loc, 10);
 
-						if(world.getBlockAt(loc).isLiquid()) {
+						if(world.getBlockAt(loc).getType() == Material.WATER) {
 							world.getBlockAt(loc).setType(Material.AIR);
 						}
 					}
