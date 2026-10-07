@@ -1,5 +1,6 @@
-package fr.stan1712.wetston.fireequipment.defaults;
+package fr.stan1712.wetston.fireequipment.tools;
 
+import fr.stan1712.wetston.fireequipment.config.PluginSettings;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -11,17 +12,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.MockBukkit;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-class ItemsTest {
+class ItemFactoryTest {
 	private Plugin plugin;
-	private Items items;
+	private ItemFactory items;
 
 	@BeforeEach
 	void setUp() {
 		MockBukkit.mock();
 		plugin = MockBukkit.createMockPlugin();
-		items = new Items(plugin);
+		items = new ItemFactory(plugin, new PluginSettings(plugin));
 	}
 
 	@AfterEach
@@ -39,10 +42,10 @@ class ItemsTest {
 	}
 
 	@Test
-	void identifiesToolsByPersistentData() {
-		assertEquals(Items.HOSE, items.identify(tagged(Material.GOLDEN_HOE, "item-type-Hose")));
-		assertEquals(Items.PUMP, items.identify(tagged(Material.CLAY_BALL, "item-type-Pump")));
-		assertEquals(Items.EXTINGUISHER, items.identify(tagged(Material.IRON_HOE, "item-type-Extinguisher")));
+	void identifiesLegacyTaggedItems() {
+		assertEquals(Optional.of(ToolType.HOSE), items.identify(tagged(Material.GOLDEN_HOE, "item-type-Hose")));
+		assertEquals(Optional.of(ToolType.PUMP), items.identify(tagged(Material.CLAY_BALL, "item-type-Pump")));
+		assertEquals(Optional.of(ToolType.EXTINGUISHER), items.identify(tagged(Material.IRON_HOE, "item-type-Extinguisher")));
 	}
 
 	@Test
@@ -52,13 +55,24 @@ class ItemsTest {
 		meta.setDisplayName("Whatever");
 		renamed.setItemMeta(meta);
 
-		assertEquals(Items.HOSE, items.identify(renamed));
+		assertEquals(Optional.of(ToolType.HOSE), items.identify(renamed));
 	}
 
 	@Test
 	void plainOrForeignItemsAreNotTools() {
-		assertNull(items.identify(null));
-		assertNull(items.identify(new ItemStack(Material.GOLDEN_HOE)));
-		assertNull(items.identify(tagged(Material.GOLDEN_HOE, "something-else")));
+		assertTrue(items.identify(null).isEmpty());
+		assertTrue(items.identify(new ItemStack(Material.GOLDEN_HOE)).isEmpty());
+		assertTrue(items.identify(tagged(Material.GOLDEN_HOE, "something-else")).isEmpty());
+		assertTrue(items.identify(tagged(Material.GOLDEN_HOE, "item-type-Sword")).isEmpty());
+	}
+
+	@Test
+	void createdItemsRoundTrip() {
+		for(ToolType type : ToolType.values()) {
+			final ItemStack item = items.create(type);
+
+			assertEquals(type.material(), item.getType());
+			assertEquals(Optional.of(type), items.identify(item));
+		}
 	}
 }

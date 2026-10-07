@@ -1,64 +1,61 @@
 package fr.stan1712.wetston.fireequipment.commands;
 
-import fr.stan1712.wetston.fireequipment.Main;
-import fr.stan1712.wetston.fireequipment.defaults.Items;
-import org.bukkit.ChatColor;
+import fr.stan1712.wetston.fireequipment.config.PluginSettings;
+import fr.stan1712.wetston.fireequipment.messages.Messages;
+import fr.stan1712.wetston.fireequipment.tools.ItemFactory;
+import fr.stan1712.wetston.fireequipment.tools.ToolType;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 
-import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class GiveItem implements CommandExecutor {
-	private final Plugin pl;
+	private final ItemFactory items;
+	private final PluginSettings settings;
+	private final Messages messages;
 
-	public GiveItem(Main pl) {
-		this.pl = pl;
+	public GiveItem(ItemFactory items, PluginSettings settings, Messages messages) {
+		this.items = items;
+		this.settings = settings;
+		this.messages = messages;
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (!(sender instanceof Player player)) {
-			sender.sendMessage("[" + getConfigString("Prefix") + "] This command can only be used by a player.");
+		if(!(sender instanceof Player player)) {
+			messages.send(sender, "[" + settings.prefix() + "] This command can only be used by a player.");
 			return true;
 		}
 
 		if(!player.hasPermission("firequip.tools.give")) {
-			player.sendMessage("[" + getConfigString("Prefix") + "]" + getConfigString("Core.NoPerms"));
+			messages.noPermission(player);
 			return true;
 		}
 
-		final Items items = new Items(this.pl);
-
-		if(args.length != 1) {
+		final Optional<ToolType> type = args.length == 1 ? ToolType.fromArgument(args[0]) : Optional.empty();
+		if(type.isEmpty()) {
 			sendItemsHelp(player);
 			return true;
 		}
 
-		switch (args[0].toLowerCase()) {
-			case "hose" -> giveItemToPlayer(items.getHoseItem(), player, "Hose");
-			case "pump" -> giveItemToPlayer(items.getPumpItem(), player, "Pump");
-			case "extinguisher" -> giveItemToPlayer(items.getExtinguisherItem(), player, "Extinguisher");
-			default -> sendItemsHelp(player);
-		}
+		player.getInventory().addItem(items.create(type.get()));
+		messages.box(player, messages.get(type.get().giveMessagePath()));
 
 		return true;
 	}
 
 	private void sendItemsHelp(Player player) {
-		player.sendMessage(ChatColor.RED + "+----- ▲ " + getConfigString("Prefix") + " ▲ -----+");
-		player.sendMessage(ChatColor.WHITE + "   " + getConfigString("Core.GiveMsg.Home"));
-		player.sendMessage(ChatColor.WHITE + "» hose = " + getConfigString("Equipment.Hose.displayName"));
-		player.sendMessage(ChatColor.WHITE + "» pump = " + getConfigString("Equipment.Pump.displayName"));
-		player.sendMessage(ChatColor.WHITE + "» extinguisher = " + getConfigString("Equipment.Extinguisher.displayName"));
-		player.sendMessage(ChatColor.RED + "+----- ----- ----- -----+");
-	}
+		final List<String> lines = new ArrayList<>();
+		lines.add(messages.get("Core.GiveMsg.Home"));
 
-	private void giveItemToPlayer(ItemStack item, Player player, String path) {
-		player.getInventory().addItem(item);
-		player.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.GiveMsg." + path));
+		for(ToolType type : ToolType.values()) {
+			lines.add(type.argument() + " = " + settings.tool(type).displayName());
+		}
+
+		messages.box(player, lines);
 	}
 }

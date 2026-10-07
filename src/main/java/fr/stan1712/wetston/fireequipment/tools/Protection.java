@@ -1,24 +1,16 @@
-package fr.stan1712.wetston.fireequipment.events;
+package fr.stan1712.wetston.fireequipment.tools;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
-final class ToolSupport {
-	private ToolSupport() {
+final class Protection {
+	private Protection() {
 		throw new IllegalStateException("Utility class");
-	}
-
-	static boolean isMainHandRightClick(PlayerInteractEvent event) {
-		final Action action = event.getAction();
-
-		return event.getHand() == EquipmentSlot.HAND && (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK);
 	}
 
 	static boolean canPlace(Player player, Block block) {

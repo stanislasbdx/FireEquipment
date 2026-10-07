@@ -1,67 +1,56 @@
 package fr.stan1712.wetston.fireequipment.commands;
 
-import fr.stan1712.wetston.fireequipment.Main;
-import fr.stan1712.wetston.fireequipment.defaults.StrStructure;
-import org.bukkit.ChatColor;
+import fr.stan1712.wetston.fireequipment.config.ConfigMigrator;
+import fr.stan1712.wetston.fireequipment.config.PluginSettings;
+import fr.stan1712.wetston.fireequipment.messages.Messages;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
-import static fr.stan1712.wetston.fireequipment.utils.Utils.ConfigFactory.getConfigString;
-
 public class FireEquipment implements CommandExecutor {
-	private final Plugin pl;
+	private final Plugin plugin;
+	private final PluginSettings settings;
+	private final Messages messages;
 
-	public FireEquipment(Main pl) {
-		this.pl = pl;
+	public FireEquipment(Plugin plugin, PluginSettings settings, Messages messages) {
+		this.plugin = plugin;
+		this.settings = settings;
+		this.messages = messages;
 	}
-
-	public static final String PREFIX_LITT = "Prefix";
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender.hasPermission("firequip.info")) {
-			if (args.length >= 1) {
-				if (args[0].equalsIgnoreCase("version")) {
-					sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
-					sender.sendMessage(ChatColor.WHITE + "» Version " + getConfigString("Version"));
-					sender.sendMessage(StrStructure.BOTTOM_BOX);
-				} else if (args[0].equalsIgnoreCase("help")) {
-					sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
-					sender.sendMessage(ChatColor.WHITE + "» /firequip help = " + getConfigString("Core.HelpMsg.DHelp"));
-					sender.sendMessage(ChatColor.WHITE + "» /firequip version = " + getConfigString("Core.HelpMsg.DVersion"));
-					sender.sendMessage(ChatColor.WHITE + "» /firequip reload = " + getConfigString("Core.HelpMsg.DReload"));
-					sender.sendMessage(ChatColor.WHITE + "» /fequip <item> = " + getConfigString("Core.HelpMsg.DGive"));
-					sender.sendMessage(StrStructure.BOTTOM_BOX);
-				} else if (args[0].equalsIgnoreCase("reload")) {
-					if (sender.hasPermission("firequip.admin.reload")) {
-						this.pl.reloadConfig();
+		if(!sender.hasPermission("firequip.info")) {
+			messages.noPermission(sender);
+			return true;
+		}
 
-						sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
-						sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.Reload"));
-						sender.sendMessage(StrStructure.BOTTOM_BOX);
-					} else {
-						sender.sendMessage("[" + getConfigString(PREFIX_LITT) + "]" + getConfigString("Core.NoPerms"));
-					}
+		final String sub = args.length >= 1 ? args[0].toLowerCase() : "";
+
+		switch (sub) {
+			case "version" -> messages.box(sender, "Version " + plugin.getConfig().getString(ConfigMigrator.VERSION_KEY));
+			case "help" -> messages.box(sender,
+				"/firequip help = " + messages.get("Core.HelpMsg.DHelp"),
+				"/firequip version = " + messages.get("Core.HelpMsg.DVersion"),
+				"/firequip reload = " + messages.get("Core.HelpMsg.DReload"),
+				"/fequip <item> = " + messages.get("Core.HelpMsg.DGive")
+			);
+			case "reload" -> {
+				if(sender.hasPermission("firequip.admin.reload")) {
+					settings.reload();
+					messages.box(sender, messages.get("Core.Reload"));
 				} else {
-					sendOverview(sender);
+					messages.noPermission(sender);
 				}
-			} else {
-				sendOverview(sender);
 			}
-		} else {
-			sender.sendMessage("[" + getConfigString(PREFIX_LITT) + "]" + getConfigString("Core.NoPerms"));
+			default -> messages.box(sender,
+				messages.get("Core.HelpMsg.Help"),
+				messages.get("Core.HelpMsg.VersionHelp"),
+				messages.get("Core.HelpMsg.ReloadHelp")
+			);
 		}
 
 		return true;
-	}
-
-	private void sendOverview(CommandSender sender) {
-		sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
-		sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.Help"));
-		sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.VersionHelp"));
-		sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.ReloadHelp"));
-		sender.sendMessage(StrStructure.BOTTOM_BOX);
 	}
 }

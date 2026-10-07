@@ -2,29 +2,36 @@ package fr.stan1712.wetston.fireequipment;
 
 import fr.stan1712.wetston.fireequipment.commands.FireEquipment;
 import fr.stan1712.wetston.fireequipment.commands.GiveItem;
-import fr.stan1712.wetston.fireequipment.events.Extinguisher;
-import fr.stan1712.wetston.fireequipment.events.Hose;
-import fr.stan1712.wetston.fireequipment.events.Pump;
-import fr.stan1712.wetston.fireequipment.utils.Config;
+import fr.stan1712.wetston.fireequipment.config.ConfigMigrator;
+import fr.stan1712.wetston.fireequipment.config.PluginSettings;
+import fr.stan1712.wetston.fireequipment.messages.Messages;
+import fr.stan1712.wetston.fireequipment.tools.ExtinguisherTool;
+import fr.stan1712.wetston.fireequipment.tools.FireTool;
+import fr.stan1712.wetston.fireequipment.tools.HoseTool;
+import fr.stan1712.wetston.fireequipment.tools.ItemFactory;
+import fr.stan1712.wetston.fireequipment.tools.PumpTool;
+import fr.stan1712.wetston.fireequipment.tools.ToolListener;
 import fr.stan1712.wetston.fireequipment.utils.Metrics;
 import fr.stan1712.wetston.fireequipment.utils.UpdateChecker;
 import fr.stan1712.wetston.fireequipment.utils.Versions;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Objects;
 
 public final class Main extends JavaPlugin {
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Core");
-	public final PluginManager pluginManager = getServer().getPluginManager();
 
 	public static final int SPIGOT_PLUGIN_ID = 69199;
 
-	private Hose hose;
+	private PluginSettings settings;
+	private Messages messages;
+	private ItemFactory items;
+	private ToolListener toolListener;
 
 	public boolean versionCheck() {
 		final String logStep = "versionCheck";
@@ -37,23 +44,19 @@ public final class Main extends JavaPlugin {
 		if(!Versions.isServerTypeSupported(serverType, serverVersion)) {
 			_log.error("[{}] * Server type {} unknown, disabling plugin.", logStep, serverType);
 
-			pluginManager.disablePlugin(this);
+			getServer().getPluginManager().disablePlugin(this);
 			return false;
 		}
 
-		switch (Versions.gameSupport(minecraftVersion)) {
-			case SUPPORTED -> {
-				_log.info("[{}] Version check !", logStep);
-				_log.info("[{}] If you got issues, report them on Github", logStep);
-			}
-			default -> {
-				_log.error("[{}] * Version {} is not supported by {}, disabling plugin.", logStep, minecraftVersion, getName());
+		if(Versions.gameSupport(minecraftVersion) != Versions.Support.SUPPORTED) {
+			_log.error("[{}] * Version {} is not supported by {}, disabling plugin.", logStep, minecraftVersion, getName());
 
-				pluginManager.disablePlugin(this);
-				return false;
-			}
+			getServer().getPluginManager().disablePlugin(this);
+			return false;
 		}
 
+		_log.info("[{}] Version check !", logStep);
+		_log.info("[{}] If you got issues, report them on Github", logStep);
 		return true;
 	}
 
@@ -75,8 +78,11 @@ public final class Main extends JavaPlugin {
 	}
 
 	private void loadConfig() {
-		pluginManager.registerEvents(new Config(), this);
-		saveConfig();
+		ConfigMigrator.migrate(this);
+
+		settings = new PluginSettings(this);
+		messages = new Messages(this, settings);
+		items = new ItemFactory(this, settings);
 	}
 
 	private void loadCommand(String logStep, String commandName, CommandExecutor commandClass) {
@@ -92,8 +98,8 @@ public final class Main extends JavaPlugin {
 	private void loadCommands() {
 		final String logStep = "loadCommands";
 
-		loadCommand(logStep, "firequip", new FireEquipment(this));
-		loadCommand(logStep, "fequip", new GiveItem(this));
+		loadCommand(logStep, "firequip", new FireEquipment(this, settings, messages));
+		loadCommand(logStep, "fequip", new GiveItem(items, settings, messages));
 
 		_log.info("[{}] Commands have been loaded !", logStep);
 	}
@@ -101,13 +107,11 @@ public final class Main extends JavaPlugin {
 	private void loadEvents() {
 		final String logStep = "loadEvents";
 
-		hose = new Hose(this);
-		pluginManager.registerEvents(hose, this);
-		_log.info("[{}] Hose event loaded", logStep);
-		pluginManager.registerEvents(new Pump(this), this);
-		_log.info("[{}] Pump event loaded", logStep);
-		pluginManager.registerEvents(new Extinguisher(this), this);
-		_log.info("[{}] Extinguisher event loaded", logStep);
+		final List<FireTool> tools = List.of(new HoseTool(this, settings), new PumpTool(settings), new ExtinguisherTool(settings));
+		toolListener = new ToolListener(items, settings, messages, tools);
+		getServer().getPluginManager().registerEvents(toolListener, this);
+
+		_log.info("[{}] {} tools loaded", logStep, tools.size());
 	}
 
 	private void logNewStep(String step) {
@@ -139,6 +143,6 @@ public final class Main extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		if(hose != null) hose.removeAllWater();
+		if(toolListener != null) toolListener.shutdown();
 	}
 }

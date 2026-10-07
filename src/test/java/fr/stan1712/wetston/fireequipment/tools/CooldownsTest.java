@@ -1,4 +1,4 @@
-package fr.stan1712.wetston.fireequipment.utils;
+package fr.stan1712.wetston.fireequipment.tools;
 
 import org.junit.jupiter.api.Test;
 

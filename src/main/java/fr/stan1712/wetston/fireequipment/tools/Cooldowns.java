@@ -1,4 +1,4 @@
-package fr.stan1712.wetston.fireequipment.utils;
+package fr.stan1712.wetston.fireequipment.tools;
 
 import java.util.Map;
 import java.util.UUID;
