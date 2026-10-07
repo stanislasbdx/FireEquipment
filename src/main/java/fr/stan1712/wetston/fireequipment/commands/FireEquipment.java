@@ -44,18 +44,24 @@ public class FireEquipment implements CommandExecutor {
 					} else {
 						sender.sendMessage("[" + getConfigString(PREFIX_LITT) + "]" + getConfigString("Core.NoPerms"));
 					}
+				} else {
+					sendOverview(sender);
 				}
 			} else {
-				sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
-				sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.Help"));
-				sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.VersionHelp"));
-				sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.ReloadHelp"));
-				sender.sendMessage(StrStructure.BOTTOM_BOX);
+				sendOverview(sender);
 			}
 		} else {
 			sender.sendMessage("[" + getConfigString(PREFIX_LITT) + "]" + getConfigString("Core.NoPerms"));
 		}
 
 		return true;
+	}
+
+	private void sendOverview(CommandSender sender) {
+		sender.sendMessage(StrStructure.START_TITLE_BOX + getConfigString(PREFIX_LITT) + StrStructure.END_TITLE_BOX);
+		sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.Help"));
+		sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.VersionHelp"));
+		sender.sendMessage(ChatColor.WHITE + "» " + getConfigString("Core.HelpMsg.ReloadHelp"));
+		sender.sendMessage(StrStructure.BOTTOM_BOX);
 	}
 }

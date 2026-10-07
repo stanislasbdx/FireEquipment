@@ -21,40 +21,28 @@ public class GiveItem implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (!(sender instanceof Player player)) return false;
+		if (!(sender instanceof Player player)) {
+			sender.sendMessage("[" + getConfigString("Prefix") + "] This command can only be used by a player.");
+			return true;
+		}
 
-		if(player.hasPermission("firequip.tools.give")) {
-			Items items = new Items(this.pl);
+		if(!player.hasPermission("firequip.tools.give")) {
+			player.sendMessage("[" + getConfigString("Prefix") + "]" + getConfigString("Core.NoPerms"));
+			return true;
+		}
 
-			if(args.length == 1) {
-				if(args[0].equalsIgnoreCase("hose")) {
-					giveItemToPlayer(
-						items.getHoseItem(),
-						player,
-						"Hose"
-					);
-				}
-				else if(args[0].equalsIgnoreCase("pump")) {
-					giveItemToPlayer(
-						items.getPumpItem(),
-						player,
-						"Pump"
-					);
-				}
-				else if(args[0].equalsIgnoreCase("extinguisher")) {
-					giveItemToPlayer(
-						items.getExtinguisherItem(),
-						player,
-						"Extinguisher"
-					);
-				}
-				else {
-					sendItemsHelp(player);
-				}
-			}
-			else {
-				sendItemsHelp(player);
-			}
+		final Items items = new Items(this.pl);
+
+		if(args.length != 1) {
+			sendItemsHelp(player);
+			return true;
+		}
+
+		switch (args[0].toLowerCase()) {
+			case "hose" -> giveItemToPlayer(items.getHoseItem(), player, "Hose");
+			case "pump" -> giveItemToPlayer(items.getPumpItem(), player, "Pump");
+			case "extinguisher" -> giveItemToPlayer(items.getExtinguisherItem(), player, "Extinguisher");
+			default -> sendItemsHelp(player);
 		}
 
 		return true;
