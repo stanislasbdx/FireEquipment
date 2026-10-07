@@ -1,7 +1,7 @@
 package fr.stan1712.wetston.fireequipment;
 
-import fr.stan1712.wetston.fireequipment.commands.FireEquipment;
-import fr.stan1712.wetston.fireequipment.commands.GiveItem;
+import fr.stan1712.wetston.fireequipment.commands.FireEquipmentCommand;
+import fr.stan1712.wetston.fireequipment.commands.GiveCommand;
 import fr.stan1712.wetston.fireequipment.config.ConfigMigrator;
 import fr.stan1712.wetston.fireequipment.config.PluginSettings;
 import fr.stan1712.wetston.fireequipment.messages.Messages;
@@ -15,7 +15,7 @@ import fr.stan1712.wetston.fireequipment.utils.Metrics;
 import fr.stan1712.wetston.fireequipment.utils.UpdateChecker;
 import fr.stan1712.wetston.fireequipment.utils.Versions;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +85,7 @@ public final class Main extends JavaPlugin {
 		items = new ItemFactory(this, settings);
 	}
 
-	private void loadCommand(String logStep, String commandName, CommandExecutor commandClass) {
+	private void loadCommand(String logStep, String commandName, TabExecutor commandClass) {
 		try {
 			Objects.requireNonNull(getCommand(commandName)).setExecutor(commandClass);
 			_log.info("[{}] /{} commands loaded", logStep, commandName);
@@ -98,8 +98,8 @@ public final class Main extends JavaPlugin {
 	private void loadCommands() {
 		final String logStep = "loadCommands";
 
-		loadCommand(logStep, "firequip", new FireEquipment(this, settings, messages));
-		loadCommand(logStep, "fequip", new GiveItem(items, settings, messages));
+		loadCommand(logStep, "firequip", new FireEquipmentCommand(this, settings, messages));
+		loadCommand(logStep, "fequip", new GiveCommand(items, settings, messages));
 
 		_log.info("[{}] Commands have been loaded !", logStep);
 	}
