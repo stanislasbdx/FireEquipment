@@ -45,6 +45,8 @@ The pack lives in `resourcepack/` and is built as `FireEquipment-pack-<version>.
 
 Tools given before the pack existed are updated automatically when their owner joins or uses them.
 
+See [docs/TEXTURES.md](docs/TEXTURES.md) for the pack layout, the pack formats and the Nexo setup.
+
 To use your own models, change `Equipment.<Tool>.itemModel` in `config.yml` (empty means the vanilla look).
 To have the plugin send the pack to players on join, fill the `ResourcePack` section:
 
