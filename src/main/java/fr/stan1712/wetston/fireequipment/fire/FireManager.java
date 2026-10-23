@@ -39,6 +39,8 @@ public class FireManager {
 	private final AshManager ash;
 	@Getter
 	private final CollapseManager collapse;
+	private final HeatAura heatAura;
+	private final WeakBlockBurster burster;
 	private final Map<BlockKey, BurningBlock> burning = new HashMap<>();
 	private final Map<ChunkRef, Set<BlockKey>> byChunk = new HashMap<>();
 	private final ArrayDeque<BlockKey> pending = new ArrayDeque<>();
@@ -56,6 +58,8 @@ public class FireManager {
 		this.storage = new FireStorage(plugin);
 		this.ash = new AshManager(plugin, this);
 		this.collapse = new CollapseManager(plugin, this);
+		this.heatAura = new HeatAura(this);
+		this.burster = new WeakBlockBurster(this);
 		this.settings = FireSettings.load(plugin.getConfig());
 	}
 
@@ -326,6 +330,8 @@ public class FireManager {
 				budget--;
 			}
 		}
+
+		heatAura.tick();
 	}
 
 	private void update(BurningBlock burningBlock) {
@@ -393,6 +399,12 @@ public class FireManager {
 			}
 
 			spread(burningBlock, block, seconds, burningNeighbors, oxygen);
+			if(burningBlock.heatRatio() >= 0.5 && ThreadLocalRandom.current().nextInt(20) == 0) {
+				burster.scanAround(block);
+				if(!burning.containsKey(key)) {
+					return;
+				}
+			}
 			if(environment.confined() && burningBlock.heatRatio() >= 0.8 && ThreadLocalRandom.current().nextInt(10) == 0) {
 				flashover(block);
 			}
