@@ -4,7 +4,10 @@ import fr.stan1712.wetston.fireequipment.Main;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -24,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class FireManager {
@@ -34,6 +38,7 @@ public class FireManager {
 	private final Map<BlockKey, BurningBlock> burning = new HashMap<>();
 	private final Map<ChunkRef, Set<BlockKey>> byChunk = new HashMap<>();
 	private final ArrayDeque<BlockKey> pending = new ArrayDeque<>();
+	private final Map<BlockKey, Long> flashovers = new HashMap<>();
 
 	@Getter
 	private FireSettings settings;
@@ -235,6 +240,49 @@ public class FireManager {
 		return false;
 	}
 
+	public double heatAround(UUID world, double x, double y, double z, double radius, boolean weighted) {
+		final double radiusSquared = radius * radius;
+		double total = 0;
+
+		for(BurningBlock burningBlock : burningWithin(world, x, y, z, radius)) {
+			if(burningBlock.isBurning()) {
+				final double distanceSquared = burningBlock.getKey().distanceSquared(x, y, z);
+				if(distanceSquared <= radiusSquared) {
+					total += weighted ? burningBlock.getHeat() / Math.max(1, distanceSquared) : burningBlock.getHeat();
+				}
+			}
+		}
+
+		return total;
+	}
+
+	public List<BurningBlock> burningWithin(UUID world, double x, double y, double z, double radius) {
+		final List<BurningBlock> found = new ArrayList<>();
+		final double radiusSquared = radius * radius;
+
+		for(int cx = ((int) Math.floor(x - radius)) >> 4; cx <= ((int) Math.floor(x + radius)) >> 4; cx++) {
+			for(int cz = ((int) Math.floor(z - radius)) >> 4; cz <= ((int) Math.floor(z + radius)) >> 4; cz++) {
+				final Set<BlockKey> keys = byChunk.get(new ChunkRef(world, cx, cz));
+				if(keys == null) {
+					continue;
+				}
+				for(BlockKey key : keys) {
+					if(key.distanceSquared(x, y, z) <= radiusSquared) {
+						found.add(burning.get(key));
+					}
+				}
+			}
+		}
+
+		return found;
+	}
+
+	public void invalidateEnvironment(BlockKey center, int radius) {
+		for(BurningBlock burningBlock : burningWithin(center.world(), center.x() + 0.5, center.y() + 0.5, center.z() + 0.5, radius)) {
+			burningBlock.setEnvironment(null);
+		}
+	}
+
 	private void register(BurningBlock burningBlock) {
 		burningBlock.setLastUpdate(tick);
 		burningBlock.setStateChangedAt(tick);
@@ -249,6 +297,10 @@ public class FireManager {
 
 	private void cycle() {
 		tick += settings.updateInterval();
+
+		if(tick % 1200 < settings.updateInterval()) {
+			flashovers.values().removeIf(at -> tick - at >= settings.confinement().flashoverCooldown());
+		}
 
 		if(pending.isEmpty()) {
 			pending.addAll(burning.keySet());
@@ -303,30 +355,40 @@ public class FireManager {
 		}
 
 		final FireSettings.Heat heatSettings = settings.heat();
-		final double oxygen = airFaces > 0 ? 1 : 0;
-		final double cooling = waterFaces * settings.water().adjacentWaterCooling();
+		final FireSettings.Confinement confinement = settings.confinement();
+		final FireEnvironment.Environment environment = FireEnvironment.of(burningBlock, block, tick, confinement.maxRoomVolume());
+		final double oxygen = oxygen(environment, airFaces);
+		final double dissipation = environment.openAir() ? settings.openAir().heatDissipation() : heatSettings.dissipation();
+		final double rain = environment.openAir() && block.getWorld().hasStorm() ? settings.openAir().rainCooling() : 0;
+		final double cooling = waterFaces * settings.water().adjacentWaterCooling() + rain;
 		final double maxHeat = burningBlock.getCategory().maxHeat();
 
 		if(burningBlock.isBurning()) {
-			final double growth = heatSettings.growth() * oxygen * (1 + burningNeighbors * settings.spread().heatPerNeighbor());
-			burningBlock.setHeat(clamp(burningBlock.getHeat() + (growth - heatSettings.dissipation() - cooling) * seconds, maxHeat));
+			final double multiplier = environment.confined() ? confinement.heatMultiplier() : 1;
+			final double growth = heatSettings.growth() * oxygen * multiplier * (1 + burningNeighbors * settings.spread().heatPerNeighbor());
+			burningBlock.setHeat(clamp(burningBlock.getHeat() + (growth - dissipation - cooling) * seconds, maxHeat));
 
 			if(burningBlock.getHeat() < heatSettings.extinguishThreshold()) {
 				smoulder(burningBlock, block);
 				return;
 			}
 
-			burningBlock.setRemainingTicks(burningBlock.getRemainingTicks() - seconds * 20 * Math.max(0.25, burningBlock.heatRatio()));
+			final double burnSpeed = environment.openAir() ? settings.openAir().burnSpeed() : environment.confined() ? confinement.burnSpeed() : 1;
+			burningBlock.setRemainingTicks(burningBlock.getRemainingTicks() - seconds * 20 * burnSpeed * Math.max(0.25, burningBlock.heatRatio()));
 			if(burningBlock.getRemainingTicks() <= 0) {
 				burnOut(burningBlock, block);
 				return;
 			}
 
+			spread(burningBlock, block, seconds, burningNeighbors, oxygen);
+			if(environment.confined() && burningBlock.heatRatio() >= 0.8 && ThreadLocalRandom.current().nextInt(10) == 0) {
+				flashover(block);
+			}
 			ensureFlames(block);
 		}
 		else {
 			final double radiant = burningNeighbors * heatSettings.growth() * settings.spread().heatPerNeighbor() * oxygen;
-			burningBlock.setHeat(clamp(burningBlock.getHeat() + (radiant - heatSettings.dissipation() - cooling) * seconds, maxHeat));
+			burningBlock.setHeat(clamp(burningBlock.getHeat() + (radiant - dissipation - cooling) * seconds, maxHeat));
 
 			if(burningBlock.getHeat() <= 0) {
 				unregister(key);
@@ -340,6 +402,101 @@ public class FireManager {
 		}
 	}
 
+	private double oxygen(FireEnvironment.Environment environment, int airFaces) {
+		if(airFaces == 0) {
+			return 0;
+		}
+		if(environment.openAir()) {
+			return 1;
+		}
+		if(environment.confined()) {
+			return 0.4 + 0.4 * Math.min(1, environment.roomVolume() / (double) Math.max(1, settings.confinement().maxRoomVolume()));
+		}
+		return 0.8;
+	}
+
+	private void spread(BurningBlock burningBlock, Block block, double seconds, int burningNeighbors, double oxygen) {
+		final FireSettings.Spread spread = settings.spread();
+		final double base = spread.baseChance() * burningBlock.heatRatio() * (1 + burningNeighbors * spread.heatPerNeighbor()) * oxygen * seconds;
+		if(base <= 0) {
+			return;
+		}
+
+		final World world = block.getWorld();
+		final int radius = spread.radius();
+		final ThreadLocalRandom random = ThreadLocalRandom.current();
+
+		for(int dx = -radius; dx <= radius; dx++) {
+			for(int dy = -radius; dy <= radius; dy++) {
+				for(int dz = -radius; dz <= radius; dz++) {
+					final int distanceSquared = dx * dx + dy * dy + dz * dz;
+					if(distanceSquared == 0) {
+						continue;
+					}
+
+					final Block target = FireBlocks.blockAt(world, block.getX() + dx, block.getY() + dy, block.getZ() + dz);
+					if(target == null) {
+						continue;
+					}
+
+					final FireCategory category = settings.categoryOf(target.getType());
+					if(category == null || burning.containsKey(BlockKey.of(target))) {
+						continue;
+					}
+
+					final double vertical = dy > 0 ? spread.upwardBonus() : dy < 0 ? 0.5 : 1;
+					if(random.nextDouble() < base * category.ignitionChance() * vertical / distanceSquared && hasAirFace(target)) {
+						ignite(target);
+					}
+				}
+			}
+		}
+	}
+
+	private void flashover(Block block) {
+		final FireSettings.Confinement confinement = settings.confinement();
+		final BlockKey zone = new BlockKey(block.getWorld().getUID(), block.getX() >> 3, block.getY() >> 3, block.getZ() >> 3);
+		final Long last = flashovers.get(zone);
+		if(last != null && tick - last < confinement.flashoverCooldown()) {
+			return;
+		}
+
+		final Location center = block.getLocation().add(0.5, 0.5, 0.5);
+		final int radius = confinement.flashoverRadius();
+		if(heatAround(block.getWorld().getUID(), center.getX(), center.getY(), center.getZ(), radius, false) < confinement.flashoverHeat()) {
+			return;
+		}
+		flashovers.put(zone, tick);
+
+		final World world = block.getWorld();
+		for(int dx = -radius; dx <= radius; dx++) {
+			for(int dy = -radius; dy <= radius; dy++) {
+				for(int dz = -radius; dz <= radius; dz++) {
+					final Block target = FireBlocks.blockAt(world, block.getX() + dx, block.getY() + dy, block.getZ() + dz);
+					final FireCategory category = target == null ? null : settings.categoryOf(target.getType());
+					if(category != null && hasAirFace(target)) {
+						ignite(target, category.maxHeat() * 0.8);
+					}
+				}
+			}
+		}
+
+		world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.5f);
+		world.playSound(center, Sound.BLOCK_FIRE_AMBIENT, 2f, 0.6f);
+		world.spawnParticle(Particle.FLAME, center, 150, radius / 2.0, radius / 2.0, radius / 2.0, 0.05);
+		_log.debug("[flashover] Flashover at {} {} {}", block.getX(), block.getY(), block.getZ());
+	}
+
+	private static boolean hasAirFace(Block block) {
+		for(BlockFace face : FireBlocks.FACES) {
+			final Block neighbor = FireBlocks.neighbor(block, face);
+			if(neighbor != null && (neighbor.getType().isAir() || neighbor.getType() == Material.FIRE)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void smoulder(BurningBlock burningBlock, Block block) {
 		setState(burningBlock, FireState.SMOULDERING);
 		removeFlames(block);
@@ -349,6 +506,7 @@ public class FireManager {
 		unregister(burningBlock.getKey());
 		removeFlames(block);
 		block.setType(Material.AIR);
+		invalidateEnvironment(burningBlock.getKey(), 3);
 	}
 
 	private void ensureFlames(Block block) {

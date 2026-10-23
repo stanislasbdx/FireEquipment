@@ -13,6 +13,8 @@ public class BurningBlock {
 	private FireState state = FireState.BURNING;
 	private long stateChangedAt;
 	private long lastUpdate;
+	private FireEnvironment.Environment environment;
+	private long environmentAt;
 
 	public BurningBlock(BlockKey key, FireCategory category, double remainingTicks, double heat) {
 		this.key = key;
