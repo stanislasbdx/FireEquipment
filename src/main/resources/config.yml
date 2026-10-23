@@ -33,3 +33,125 @@ Equipment:
     displayName: "Extinguisher"
     usage: "Right-click to extinguish flames"
     range: 2
+
+realisticFire:
+  enabled: true
+  worlds: []
+  updateInterval: 10
+  maxBurningBlocks: 3000
+  maxUpdatesPerCycle: 400
+  heat:
+    ignition: 45
+    growth: 6
+    dissipation: 1
+    extinguishThreshold: 15
+    reigniteThreshold: 40
+    reigniteDelay: 10
+  spread:
+    radius: 1
+    baseChance: 0.08
+    heatPerNeighbor: 0.15
+    upwardBonus: 2.0
+  openAir:
+    burnSpeed: 1.25
+    heatDissipation: 3
+    rainCooling: 2
+  confinement:
+    maxRoomVolume: 150
+    burnSpeed: 0.7
+    heatMultiplier: 1.8
+    flashoverRadius: 4
+    flashoverHeat: 600
+    flashoverCooldown: 30
+  water:
+    hoseCooling: 35
+    powderKnockdown: 90
+    powderCooling: 8
+    adjacentWaterCooling: 10
+  heatAura:
+    enabled: true
+    radius: 6
+    warnThreshold: 60
+    igniteThreshold: 150
+    fireTicksPerHeat: 2
+    maxFireTicks: 160
+  weakBlocks:
+    enabled: true
+    radius: 4
+    burstHeat: 120
+    burstChance: 0.25
+    materials:
+      - "GLASS"
+      - "TINTED_GLASS"
+      - "*_STAINED_GLASS"
+      - "GLASS_PANE"
+      - "*_GLASS_PANE"
+      - "#doors"
+      - "#trapdoors"
+  ash:
+    chance: 0.35
+    materials:
+      GRAY_CONCRETE_POWDER: 70
+      GRAVEL: 30
+    particles: true
+    particleDuration: 60
+    maxParticlesPerCycle: 300
+  collapse:
+    enabled: true
+    maxHeight: 12
+    minSideSupport: 2
+    excluded:
+      - "BEDROCK"
+      - "OBSIDIAN"
+      - "CRYING_OBSIDIAN"
+      - "BARRIER"
+      - "REINFORCED_DEEPSLATE"
+      - "END_PORTAL_FRAME"
+  categories:
+    wood:
+      burnTime: 45
+      ignitionChance: 0.6
+      maxHeat: 100
+      materials:
+        - "#logs_that_burn"
+        - "#planks"
+        - "#wooden_stairs"
+        - "#wooden_slabs"
+        - "#wooden_fences"
+        - "#fence_gates"
+        - "#wooden_doors"
+        - "#wooden_trapdoors"
+    foliage:
+      burnTime: 6
+      ignitionChance: 1.0
+      maxHeat: 60
+      ash: false
+      materials:
+        - "#leaves"
+        - "#flowers"
+        - "SHORT_GRASS"
+        - "TALL_GRASS"
+        - "FERN"
+        - "LARGE_FERN"
+        - "HAY_BLOCK"
+        - "DRIED_KELP_BLOCK"
+    textile:
+      burnTime: 10
+      ignitionChance: 0.9
+      maxHeat: 70
+      materials:
+        - "#wool"
+        - "#wool_carpets"
+        - "#beds"
+    paper:
+      burnTime: 20
+      ignitionChance: 0.8
+      maxHeat: 80
+      materials:
+        - "BOOKSHELF"
+    fuel:
+      burnTime: 300
+      ignitionChance: 0.3
+      maxHeat: 150
+      materials:
+        - "COAL_BLOCK"
