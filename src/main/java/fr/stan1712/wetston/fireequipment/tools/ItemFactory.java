@@ -19,6 +19,7 @@ import java.util.Optional;
 
 public class ItemFactory {
 	private static final String TYPE_PREFIX = "item-type-";
+	private static final Enchantment LEGACY_GLOW = Enchantment.FIRE_PROTECTION;
 
 	private final PluginSettings settings;
 	private final NamespacedKey namespacedKey;
@@ -34,7 +35,6 @@ public class ItemFactory {
 		final ItemMeta meta = item.getItemMeta();
 
 		meta.getPersistentDataContainer().set(namespacedKey, PersistentDataType.STRING, TYPE_PREFIX + type.configKey());
-		meta.addEnchant(Enchantment.FIRE_PROTECTION, 1, true);
 		meta.setUnbreakable(true);
 		applyModel(meta, type);
 		meta.setDisplayName(ChatColor.RED + "§l" + Messages.legacy(tool.displayName()));
@@ -49,15 +49,20 @@ public class ItemFactory {
 		if(type.isEmpty()) return false;
 
 		final ItemMeta meta = item.getItemMeta();
-		if(!needsModel(meta, type.get())) return false;
+		if(!needsModel(meta, type.get()) && !hasLegacyGlow(meta)) return false;
 
 		applyModel(meta, type.get());
+		meta.removeEnchant(LEGACY_GLOW);
 		item.setItemMeta(meta);
 		return true;
 	}
 
 	void applyModel(ItemMeta meta, ToolType type) {
 		meta.setItemModel(settings.tool(type).itemModel());
+	}
+
+	boolean hasLegacyGlow(ItemMeta meta) {
+		return meta.hasEnchant(LEGACY_GLOW);
 	}
 
 	boolean needsModel(ItemMeta meta, ToolType type) {
