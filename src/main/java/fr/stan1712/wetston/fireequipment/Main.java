@@ -3,8 +3,10 @@ package fr.stan1712.wetston.fireequipment;
 import fr.stan1712.wetston.fireequipment.commands.FireEquipment;
 import fr.stan1712.wetston.fireequipment.commands.GiveItem;
 import fr.stan1712.wetston.fireequipment.events.Extinguisher;
+import fr.stan1712.wetston.fireequipment.events.FireListener;
 import fr.stan1712.wetston.fireequipment.events.Hose;
 import fr.stan1712.wetston.fireequipment.events.Pump;
+import fr.stan1712.wetston.fireequipment.fire.FireManager;
 import fr.stan1712.wetston.fireequipment.utils.Config;
 import fr.stan1712.wetston.fireequipment.utils.Metrics;
 import fr.stan1712.wetston.fireequipment.utils.UpdateChecker;
@@ -23,6 +25,12 @@ public final class Main extends JavaPlugin {
 	public final PluginManager pluginManager = getServer().getPluginManager();
 
 	public static final int SPIGOT_PLUGIN_ID = 69199;
+
+	private FireManager fireManager;
+
+	public FireManager getFireManager() {
+		return fireManager;
+	}
 
 	public boolean versionCheck() {
 		final String logStep = "versionCheck";
@@ -113,6 +121,15 @@ public final class Main extends JavaPlugin {
 		_log.info("[{}] Extinguisher event loaded", logStep);
 	}
 
+	private void loadFire() {
+		final String logStep = "loadFire";
+
+		fireManager = new FireManager(this);
+		fireManager.start();
+		pluginManager.registerEvents(new FireListener(fireManager), this);
+		_log.info("[{}] Realistic fire loaded", logStep);
+	}
+
 	private void logNewStep(String step) {
 		_log.info("{@ {}} ---", step);
 	}
@@ -137,6 +154,16 @@ public final class Main extends JavaPlugin {
 
 			logNewStep("loadEvents");
 			loadEvents();
+
+			logNewStep("loadFire");
+			loadFire();
+		}
+	}
+
+	@Override
+	public void onDisable() {
+		if(fireManager != null) {
+			fireManager.stop();
 		}
 	}
 }
