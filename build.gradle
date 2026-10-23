@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'fr.stan1712.wetston'
-version = '2.1.0'
+version = '2.2.0'
 
 repositories {
     mavenCentral()
@@ -88,8 +88,20 @@ shadowJar {
     relocate 'org.bstats', 'fr.stan1712.wetston.fireequipment.libs.bstats'
 }
 
+tasks.register('resourcePackZip', Zip) {
+    from 'resourcepack'
+    archiveBaseName = rootProject.name + '-pack'
+    destinationDirectory = layout.buildDirectory.dir('resourcepack')
+    reproducibleFileOrder = true
+    preserveFileTimestamps = false
+    doLast {
+        def sha1 = java.security.MessageDigest.getInstance('SHA-1').digest(archiveFile.get().asFile.bytes).encodeHex().toString()
+        println "Resource pack: ${archiveFile.get().asFile.name} (sha1 ${sha1})"
+    }
+}
+
 tasks.named('build') {
-    dependsOn tasks.named('shadowJar')
+    dependsOn tasks.named('shadowJar'), tasks.named('resourcePackZip')
 }
 
 tasks.register('copyJar', Copy) {

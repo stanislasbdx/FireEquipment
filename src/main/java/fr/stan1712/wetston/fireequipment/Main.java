@@ -5,6 +5,7 @@ import fr.stan1712.wetston.fireequipment.commands.GiveCommand;
 import fr.stan1712.wetston.fireequipment.config.ConfigMigrator;
 import fr.stan1712.wetston.fireequipment.config.PluginSettings;
 import fr.stan1712.wetston.fireequipment.messages.Messages;
+import fr.stan1712.wetston.fireequipment.pack.ResourcePackListener;
 import fr.stan1712.wetston.fireequipment.tools.ExtinguisherTool;
 import fr.stan1712.wetston.fireequipment.tools.FireTool;
 import fr.stan1712.wetston.fireequipment.tools.HoseTool;
@@ -110,6 +111,8 @@ public final class Main extends JavaPlugin {
 		final List<FireTool> tools = List.of(new HoseTool(this, settings), new PumpTool(settings), new ExtinguisherTool(settings));
 		toolListener = new ToolListener(items, settings, messages, tools);
 		getServer().getPluginManager().registerEvents(toolListener, this);
+
+		getServer().getPluginManager().registerEvents(new ResourcePackListener(settings), this);
 
 		_log.info("[{}] {} tools loaded", logStep, tools.size());
 	}

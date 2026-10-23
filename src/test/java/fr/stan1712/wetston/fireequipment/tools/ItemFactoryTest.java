@@ -3,6 +3,7 @@ package fr.stan1712.wetston.fireequipment.tools;
 import fr.stan1712.wetston.fireequipment.config.PluginSettings;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -74,5 +75,51 @@ class ItemFactoryTest {
 			assertEquals(type.material(), item.getType());
 			assertEquals(Optional.of(type), items.identify(item));
 		}
+	}
+
+	@Test
+	void applyModelSetsTheConfiguredModel() {
+		for(ToolType type : ToolType.values()) {
+			final ItemMeta meta = new ItemStack(type.material()).getItemMeta();
+
+			assertTrue(items.needsModel(meta, type));
+			items.applyModel(meta, type);
+
+			assertEquals(type.defaultItemModel(), meta.getItemModel().asString());
+			assertFalse(items.needsModel(meta, type));
+		}
+	}
+
+	@Test
+	void refreshUpdatesLegacyItemsAndKeepsTheirTag() {
+		final ItemStack legacy = tagged(Material.GOLDEN_HOE, "item-type-Hose");
+
+		assertTrue(items.refresh(legacy));
+		assertEquals(Optional.of(ToolType.HOSE), items.identify(legacy));
+	}
+
+	@Test
+	void refreshIgnoresForeignItems() {
+		final ItemStack plain = new ItemStack(Material.GOLDEN_HOE);
+
+		assertFalse(items.refresh(plain));
+		assertFalse(plain.getItemMeta().hasItemModel());
+	}
+
+	@Test
+	void createdItemsDoNotGlow() {
+		for(ToolType type : ToolType.values()) {
+			assertFalse(items.create(type).getItemMeta().hasEnchants());
+		}
+	}
+
+	@Test
+	void refreshRemovesTheGlowOfLegacyItems() {
+		final ItemStack legacy = tagged(Material.GOLDEN_HOE, "item-type-Hose");
+		legacy.addUnsafeEnchantment(Enchantment.FIRE_PROTECTION, 1);
+
+		assertTrue(items.refresh(legacy));
+		assertFalse(legacy.getItemMeta().hasEnchants());
+		assertEquals(Optional.of(ToolType.HOSE), items.identify(legacy));
 	}
 }
