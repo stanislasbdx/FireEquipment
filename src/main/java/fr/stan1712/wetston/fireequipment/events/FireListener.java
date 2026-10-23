@@ -105,6 +105,9 @@ public class FireListener implements Listener {
 		else if(ash.isTagged(fallingBlock)) {
 			ash.mark(block);
 		}
+		else {
+			fire.getCollapse().land(fallingBlock, block);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

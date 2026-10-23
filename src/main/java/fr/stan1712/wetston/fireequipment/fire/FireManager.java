@@ -37,6 +37,8 @@ public class FireManager {
 	private final FireStorage storage;
 	@Getter
 	private final AshManager ash;
+	@Getter
+	private final CollapseManager collapse;
 	private final Map<BlockKey, BurningBlock> burning = new HashMap<>();
 	private final Map<ChunkRef, Set<BlockKey>> byChunk = new HashMap<>();
 	private final ArrayDeque<BlockKey> pending = new ArrayDeque<>();
@@ -53,6 +55,7 @@ public class FireManager {
 		this.plugin = plugin;
 		this.storage = new FireStorage(plugin);
 		this.ash = new AshManager(plugin, this);
+		this.collapse = new CollapseManager(plugin, this);
 		this.settings = FireSettings.load(plugin.getConfig());
 	}
 
@@ -558,6 +561,7 @@ public class FireManager {
 		unregister(burningBlock.getKey());
 		removeFlames(block);
 		block.setType(Material.AIR);
+		collapse.collapseAbove(block);
 		invalidateEnvironment(burningBlock.getKey(), 3);
 
 		if(burningBlock.getCategory().ash() && ThreadLocalRandom.current().nextDouble() < settings.ash().chance()) {
