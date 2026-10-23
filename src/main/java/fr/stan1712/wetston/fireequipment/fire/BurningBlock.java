@@ -1,10 +1,5 @@
 package fr.stan1712.wetston.fireequipment.fire;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class BurningBlock {
 	private final BlockKey key;
 	private final FireCategory category;
@@ -21,6 +16,70 @@ public class BurningBlock {
 		this.category = category;
 		this.remainingTicks = remainingTicks;
 		this.heat = heat;
+	}
+
+	public BlockKey getKey() {
+		return key;
+	}
+
+	public FireCategory getCategory() {
+		return category;
+	}
+
+	public double getRemainingTicks() {
+		return remainingTicks;
+	}
+
+	public void setRemainingTicks(double remainingTicks) {
+		this.remainingTicks = remainingTicks;
+	}
+
+	public double getHeat() {
+		return heat;
+	}
+
+	public void setHeat(double heat) {
+		this.heat = heat;
+	}
+
+	public FireState getState() {
+		return state;
+	}
+
+	public void setState(FireState state) {
+		this.state = state;
+	}
+
+	public long getStateChangedAt() {
+		return stateChangedAt;
+	}
+
+	public void setStateChangedAt(long stateChangedAt) {
+		this.stateChangedAt = stateChangedAt;
+	}
+
+	public long getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate(long lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
+	public FireEnvironment.Environment getEnvironment() {
+		return environment;
+	}
+
+	public void setEnvironment(FireEnvironment.Environment environment) {
+		this.environment = environment;
+	}
+
+	public long getEnvironmentAt() {
+		return environmentAt;
+	}
+
+	public void setEnvironmentAt(long environmentAt) {
+		this.environmentAt = environmentAt;
 	}
 
 	public boolean isBurning() {

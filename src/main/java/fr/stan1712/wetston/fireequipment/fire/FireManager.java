@@ -1,7 +1,5 @@
 package fr.stan1712.wetston.fireequipment.fire;
 
-import fr.stan1712.wetston.fireequipment.Main;
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -14,6 +12,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.Fire;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +32,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class FireManager {
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Fire");
 
-	private final Main plugin;
+	private final Plugin plugin;
 	private final FireStorage storage;
-	@Getter
 	private final AshManager ash;
-	@Getter
 	private final CollapseManager collapse;
 	private final HeatAura heatAura;
 	private final WeakBlockBurster burster;
@@ -46,14 +43,12 @@ public class FireManager {
 	private final ArrayDeque<BlockKey> pending = new ArrayDeque<>();
 	private final Map<BlockKey, Long> flashovers = new HashMap<>();
 
-	@Getter
 	private FireSettings settings;
-	@Getter
 	private long tick;
 	private BukkitTask task;
 	private int particleBudget;
 
-	public FireManager(Main plugin) {
+	public FireManager(Plugin plugin) {
 		this.plugin = plugin;
 		this.storage = new FireStorage(plugin);
 		this.ash = new AshManager(plugin, this);
@@ -97,6 +92,22 @@ public class FireManager {
 		stop();
 		settings = FireSettings.load(plugin.getConfig());
 		start();
+	}
+
+	public FireSettings getSettings() {
+		return settings;
+	}
+
+	public long getTick() {
+		return tick;
+	}
+
+	public AshManager getAsh() {
+		return ash;
+	}
+
+	public CollapseManager getCollapse() {
+		return collapse;
 	}
 
 	public boolean isWorldEnabled(World world) {
@@ -249,9 +260,6 @@ public class FireManager {
 			cool(burningBlock, burningBlock.getHeat() <= water.powderKnockdown());
 		}
 
-		if(center.getType() == Material.FIRE && !supportsFlame(center)) {
-			center.setType(Material.AIR);
-		}
 		return true;
 	}
 

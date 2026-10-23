@@ -40,7 +40,7 @@ public class MaterialMatcher {
 			else if(entry.contains("*")) {
 				final Pattern pattern = Pattern.compile(entry.toUpperCase(Locale.ROOT).replace("*", ".*"));
 				Arrays.stream(Material.values())
-						.filter(material -> material.isBlock() && !material.isLegacy() && pattern.matcher(material.name()).matches())
+						.filter(material -> !material.isLegacy() && material.isBlock() && pattern.matcher(material.name()).matches())
 						.forEach(materials::add);
 			}
 			else {
