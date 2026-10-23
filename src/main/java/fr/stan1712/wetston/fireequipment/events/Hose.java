@@ -43,6 +43,8 @@ public class Hose implements Listener {
 						world.spawnParticle(Particle.SPLASH, loc, 100);
 						world.spawnParticle(Particle.FALLING_WATER, loc, 65);
 
+						this.pl.getFireManager().applyWater(world.getBlockAt(loc));
+
 						double random = Math.random();
 						if(d >= 1 && random >= 0.2) {
 							if(world.getBlockAt(loc).isEmpty() || world.getBlockAt(loc).getType().equals(Material.FIRE)) {

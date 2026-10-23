@@ -12,10 +12,15 @@ commands:
   firequip:
     description: Manage and get an overview of the plugin.
     permission: firequip.info
-    usage: /firequip <help/version/reload>
+    usage: /firequip <help/version/reload/fire>
     aliases: [fireequipment]
   fequip:
     description: Gives you a firefighter tool.
     permission: firequip.tools.give
     usage: /fequip <item>
     aliases: [equip]
+
+permissions:
+  firequip.admin.fire:
+    description: View realistic fire stats and extinguish fires.
+    default: op

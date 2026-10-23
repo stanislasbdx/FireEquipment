@@ -217,6 +217,59 @@ public class FireManager {
 		return cleared;
 	}
 
+	public boolean applyWater(Block center) {
+		if(!isWorldEnabled(center.getWorld())) {
+			return false;
+		}
+
+		final double cooling = settings.water().hoseCooling();
+		boolean hit = false;
+
+		for(BurningBlock burningBlock : burningWithin(center.getWorld().getUID(), center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5, 1.5)) {
+			burningBlock.setHeat(Math.max(0, burningBlock.getHeat() - cooling));
+			cool(burningBlock, burningBlock.getHeat() < settings.heat().extinguishThreshold());
+			hit = true;
+		}
+
+		if(hit) {
+			center.getWorld().playSound(center.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 0.6f, 1f);
+		}
+		return true;
+	}
+
+	public boolean applyPowder(Block center) {
+		if(!isWorldEnabled(center.getWorld())) {
+			return false;
+		}
+
+		final FireSettings.Water water = settings.water();
+
+		for(BurningBlock burningBlock : burningWithin(center.getWorld().getUID(), center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5, 1.5)) {
+			burningBlock.setHeat(Math.max(0, burningBlock.getHeat() - water.powderCooling()));
+			cool(burningBlock, burningBlock.getHeat() <= water.powderKnockdown());
+		}
+
+		if(center.getType() == Material.FIRE && !supportsFlame(center)) {
+			center.setType(Material.AIR);
+		}
+		return true;
+	}
+
+	private void cool(BurningBlock burningBlock, boolean knockDown) {
+		if(!burningBlock.isBurning()) {
+			burningBlock.setStateChangedAt(tick);
+			return;
+		}
+
+		if(knockDown) {
+			final Block block = burningBlock.getKey().toBlock();
+			setState(burningBlock, FireState.SMOULDERING);
+			if(block != null) {
+				removeFlames(block);
+			}
+		}
+	}
+
 	public void loadChunk(Chunk chunk) {
 		for(FireStorage.StoredFire stored : storage.load(chunk)) {
 			final Block block = chunk.getWorld().getBlockAt(stored.key().x(), stored.key().y(), stored.key().z());

@@ -14,11 +14,18 @@ Core:
     DVersion: "Be able to know plugin's version"
     DReload: "Reload the config file"
     DGive: "Be able to give yourself an item"
+    DFire: "Realistic fire overview or extinguish fires"
   GiveMsg:
     Home: "What item do you need ?"
     Hose: "You got an fire hose"
     Pump: "You got a pump"
     Extinguisher: "You got an extinguisher"
+  FireMsg:
+    Status: "Realistic fire"
+    Worlds: "Worlds"
+    Burning: "Burning blocks"
+    Smouldering: "Smouldering blocks"
+    Cleared: "burning blocks extinguished"
 
 Equipment:
   Hose:
@@ -64,9 +71,9 @@ realisticFire:
     flashoverHeat: 600
     flashoverCooldown: 30
   water:
-    hoseCooling: 35
+    hoseCooling: 12
     powderKnockdown: 90
-    powderCooling: 8
+    powderCooling: 5
     adjacentWaterCooling: 10
   heatAura:
     enabled: true
