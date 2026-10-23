@@ -35,6 +35,8 @@ public class FireManager {
 
 	private final Main plugin;
 	private final FireStorage storage;
+	@Getter
+	private final AshManager ash;
 	private final Map<BlockKey, BurningBlock> burning = new HashMap<>();
 	private final Map<ChunkRef, Set<BlockKey>> byChunk = new HashMap<>();
 	private final ArrayDeque<BlockKey> pending = new ArrayDeque<>();
@@ -45,10 +47,12 @@ public class FireManager {
 	@Getter
 	private long tick;
 	private BukkitTask task;
+	private int particleBudget;
 
 	public FireManager(Main plugin) {
 		this.plugin = plugin;
 		this.storage = new FireStorage(plugin);
+		this.ash = new AshManager(plugin, this);
 		this.settings = FireSettings.load(plugin.getConfig());
 	}
 
@@ -214,6 +218,8 @@ public class FireManager {
 	}
 
 	public void unloadChunk(Chunk chunk) {
+		ash.unloadChunk(chunk);
+
 		final Set<BlockKey> keys = byChunk.get(ChunkRef.of(chunk));
 		final List<BurningBlock> blocks = new ArrayList<>();
 
@@ -306,6 +312,9 @@ public class FireManager {
 			pending.addAll(burning.keySet());
 		}
 
+		particleBudget = settings.ash().particles() ? settings.ash().maxParticlesPerCycle() : 0;
+		particleBudget -= ash.tickParticles(tick, particleBudget);
+
 		int budget = settings.maxUpdatesPerCycle();
 		while(budget > 0 && !pending.isEmpty()) {
 			final BurningBlock burningBlock = burning.get(pending.poll());
@@ -385,6 +394,7 @@ public class FireManager {
 				flashover(block);
 			}
 			ensureFlames(block);
+			burningEffects(burningBlock, block, environment);
 		}
 		else {
 			final double radiant = burningNeighbors * heatSettings.growth() * settings.spread().heatPerNeighbor() * oxygen;
@@ -398,6 +408,9 @@ public class FireManager {
 			if(oxygen > 0 && burningBlock.getHeat() >= heatSettings.reigniteThreshold() && tick - burningBlock.getStateChangedAt() >= heatSettings.reigniteDelay()) {
 				setState(burningBlock, FireState.BURNING);
 				ensureFlames(block);
+			}
+			else {
+				smoulderEffects(block);
 			}
 		}
 	}
@@ -497,6 +510,45 @@ public class FireManager {
 		return false;
 	}
 
+	private void burningEffects(BurningBlock burningBlock, Block block, FireEnvironment.Environment environment) {
+		if(particleBudget <= 0) {
+			return;
+		}
+
+		final World world = block.getWorld();
+		final Location top = block.getLocation().add(0.5, 1.2, 0.5);
+		final ThreadLocalRandom random = ThreadLocalRandom.current();
+		final int whiteAsh = (int) Math.ceil(4 * burningBlock.heatRatio());
+
+		world.spawnParticle(Particle.WHITE_ASH, top, whiteAsh, 1.5, 1.5, 1.5, 0);
+		particleBudget -= whiteAsh;
+
+		if(random.nextDouble() < 0.4) {
+			world.spawnParticle(Particle.LARGE_SMOKE, top, 1, 0.2, 0.3, 0.2, 0.02);
+			particleBudget--;
+		}
+		if(random.nextDouble() < 0.1) {
+			world.spawnParticle(Particle.ASH, top, 4, 1, 1, 1, 0);
+			particleBudget -= 4;
+		}
+		if(environment.openAir() && burningBlock.heatRatio() > 0.7 && random.nextDouble() < 0.08) {
+			world.spawnParticle(Particle.CAMPFIRE_SIGNAL_SMOKE, top, 0, 0, 0.08, 0);
+			particleBudget--;
+		}
+		if(random.nextDouble() < 0.05) {
+			world.playSound(top, Sound.BLOCK_FIRE_AMBIENT, 0.8f, 0.8f + random.nextFloat() * 0.4f);
+		}
+	}
+
+	private void smoulderEffects(Block block) {
+		if(particleBudget <= 0 || ThreadLocalRandom.current().nextDouble() >= 0.3) {
+			return;
+		}
+
+		block.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, block.getLocation().add(0.5, 1, 0.5), 0, 0, 0.03, 0);
+		particleBudget--;
+	}
+
 	private void smoulder(BurningBlock burningBlock, Block block) {
 		setState(burningBlock, FireState.SMOULDERING);
 		removeFlames(block);
@@ -507,6 +559,10 @@ public class FireManager {
 		removeFlames(block);
 		block.setType(Material.AIR);
 		invalidateEnvironment(burningBlock.getKey(), 3);
+
+		if(burningBlock.getCategory().ash() && ThreadLocalRandom.current().nextDouble() < settings.ash().chance()) {
+			ash.spawn(block);
+		}
 	}
 
 	private void ensureFlames(Block block) {

@@ -1,5 +1,6 @@
 package fr.stan1712.wetston.fireequipment.events;
 
+import fr.stan1712.wetston.fireequipment.fire.AshManager;
 import fr.stan1712.wetston.fireequipment.fire.BlockKey;
 import fr.stan1712.wetston.fireequipment.fire.BurningBlock;
 import fr.stan1712.wetston.fireequipment.fire.FireManager;
@@ -8,19 +9,31 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
+import java.util.Iterator;
+import java.util.List;
+
 public class FireListener implements Listener {
 	private final FireManager fire;
+	private final AshManager ash;
 
 	public FireListener(FireManager fire) {
 		this.fire = fire;
+		this.ash = fire.getAsh();
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -60,6 +73,64 @@ public class FireListener implements Listener {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	public void onAshBreak(BlockBreakEvent event) {
+		if(ash.isAsh(event.getBlock())) {
+			event.setDropItems(false);
+			event.setExpToDrop(0);
+			ash.unmark(event.getBlock());
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onAshForm(BlockFormEvent event) {
+		if(ash.isAsh(event.getBlock())) {
+			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	public void onFallingBlock(EntityChangeBlockEvent event) {
+		if(!(event.getEntity() instanceof FallingBlock fallingBlock)) {
+			return;
+		}
+
+		final Block block = event.getBlock();
+		if(event.getTo() == Material.AIR) {
+			if(ash.isAsh(block)) {
+				ash.unmark(block);
+				ash.tag(fallingBlock);
+			}
+		}
+		else if(ash.isTagged(fallingBlock)) {
+			ash.mark(block);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	public void onEntityExplode(EntityExplodeEvent event) {
+		clearExplodedAsh(event.blockList());
+	}
+
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	public void onBlockExplode(BlockExplodeEvent event) {
+		clearExplodedAsh(event.blockList());
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onPistonExtend(BlockPistonExtendEvent event) {
+		if(event.getBlocks().stream().anyMatch(ash::isAsh)) {
+			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onPistonRetract(BlockPistonRetractEvent event) {
+		if(event.getBlocks().stream().anyMatch(ash::isAsh)) {
+			event.setCancelled(true);
+		}
+	}
+
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBreak(BlockBreakEvent event) {
 		final BurningBlock burningBlock = fire.get(BlockKey.of(event.getBlock()));
@@ -78,5 +149,18 @@ public class FireListener implements Listener {
 	@EventHandler
 	public void onChunkUnload(ChunkUnloadEvent event) {
 		fire.unloadChunk(event.getChunk());
+	}
+
+	private void clearExplodedAsh(List<Block> blocks) {
+		final Iterator<Block> iterator = blocks.iterator();
+
+		while(iterator.hasNext()) {
+			final Block block = iterator.next();
+			if(ash.isAsh(block)) {
+				iterator.remove();
+				ash.unmark(block);
+				block.setType(Material.AIR);
+			}
+		}
 	}
 }
