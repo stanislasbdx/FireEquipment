@@ -11,10 +11,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.ThreadLocalRandom;
 
 public record FireSettings(
 		boolean enabled,
@@ -31,6 +28,7 @@ public record FireSettings(
 		WeakBlocks weakBlocks,
 		Ash ash,
 		Collapse collapse,
+		Scorch scorch,
 		Features features,
 		Map<Material, FireCategory> categories
 ) {
@@ -55,18 +53,17 @@ public record FireSettings(
 
 	public record WeakBlocks(boolean enabled, int radius, double burstHeat, double burstChance, Set<Material> materials) {}
 
-	public record Ash(double chance, NavigableMap<Integer, Material> weightedMaterials, int totalWeight, boolean particles, int particleDuration, int maxParticlesPerCycle) {
+	public record Ash(double chance, WeightedMaterials materials, boolean particles, int particleDuration, int maxParticlesPerCycle) {
 		public Material pick() {
-			if(totalWeight <= 0) {
-				return Material.GRAY_CONCRETE_POWDER;
-			}
-			return weightedMaterials.ceilingEntry(ThreadLocalRandom.current().nextInt(totalWeight)).getValue();
+			return materials.pick();
 		}
 
 		public boolean isAshMaterial(Material material) {
-			return weightedMaterials.containsValue(material);
+			return materials.contains(material);
 		}
 	}
+
+	public record Scorch(boolean enabled, Set<Material> convertible, WeightedMaterials materials) {}
 
 	public record Collapse(boolean enabled, boolean effects, Set<Material> anchors) {}
 
@@ -166,6 +163,11 @@ public record FireSettings(
 						features.collapseEffects(),
 						MaterialMatcher.resolve(config.getStringList(ROOT + "collapse.anchors"))
 				),
+				new Scorch(
+						features.scorch(),
+						MaterialMatcher.resolve(config.getStringList(ROOT + "scorch.convertible")),
+						WeightedMaterials.read(config.getConfigurationSection(ROOT + "scorch.materials"), Material.COARSE_DIRT)
+				),
 				features,
 				loadCategories(config, factors)
 		);
@@ -184,28 +186,9 @@ public record FireSettings(
 	}
 
 	private static Ash loadAsh(FileConfiguration config, Features features, Factors factors) {
-		final NavigableMap<Integer, Material> weighted = new TreeMap<>();
-		int total = 0;
-
-		final ConfigurationSection section = config.getConfigurationSection(ROOT + "ash.materials");
-		if(section != null) {
-			for(String name : section.getKeys(false)) {
-				final Material material = Material.matchMaterial(name);
-				final int weight = section.getInt(name);
-
-				if(material == null || !material.isBlock() || weight <= 0) {
-					_log.warn("[loadAsh] Invalid ash material {}", name);
-					continue;
-				}
-				total += weight;
-				weighted.put(total - 1, material);
-			}
-		}
-
 		return new Ash(
 				features.ash() ? Math.min(1, FireDefaults.ASH_CHANCE * factors.ash()) : 0,
-				weighted,
-				total,
+				WeightedMaterials.read(config.getConfigurationSection(ROOT + "ash.materials"), Material.GRAY_CONCRETE_POWDER),
 				features.particles(),
 				seconds(FireDefaults.ASH_PARTICLE_SECONDS),
 				FireDefaults.MAX_PARTICLES_PER_CYCLE

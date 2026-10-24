@@ -492,6 +492,7 @@ public class FireManager {
 			}
 
 			spread(burningBlock, block, seconds, burningNeighbors, oxygen);
+			scorch(burningBlock, block, seconds);
 			if(burningBlock.heatRatio() >= 0.5 && ThreadLocalRandom.current().nextInt(20) == 0) {
 				burster.scanAround(block);
 				if(!burning.containsKey(key)) {
@@ -572,6 +573,21 @@ public class FireManager {
 				}
 			}
 		}
+	}
+
+	private void scorch(BurningBlock burningBlock, Block block, double seconds) {
+		final FireSettings.Scorch scorch = settings.scorch();
+		final ThreadLocalRandom random = ThreadLocalRandom.current();
+		if(!scorch.enabled() || burningBlock.heatRatio() < FireDefaults.SCORCH_HEAT_RATIO || random.nextDouble() >= FireDefaults.SCORCH_CHANCE_PER_SECOND * seconds * 9) {
+			return;
+		}
+
+		final Block ground = FireBlocks.blockAt(block.getWorld(), block.getX() + random.nextInt(-1, 2), block.getY() - random.nextInt(0, 2), block.getZ() + random.nextInt(-1, 2));
+		if(ground == null || !scorch.convertible().contains(ground.getType())) {
+			return;
+		}
+
+		ground.setType(ground.getType() == Material.DIRT ? Material.COARSE_DIRT : scorch.materials().pick());
 	}
 
 	private void flashover(Block block) {

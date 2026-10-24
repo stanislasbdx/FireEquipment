@@ -99,6 +99,18 @@ realisticFire:
     materials:
       GRAY_CONCRETE_POWDER: 70
       GRAVEL: 30
+  scorch:
+    convertible:
+      - "GRASS_BLOCK"
+      - "DIRT"
+      - "PODZOL"
+      - "MYCELIUM"
+      - "DIRT_PATH"
+      - "FARMLAND"
+      - "ROOTED_DIRT"
+    materials:
+      COARSE_DIRT: 60
+      DIRT: 40
   weakBlocks:
     materials:
       - "GLASS"
