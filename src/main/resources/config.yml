@@ -92,7 +92,6 @@ realisticFire:
     collapseEffects: true
     ash: true
     particles: true
-    smoke: true
     scorch: true
     crack: true
     tnt: true

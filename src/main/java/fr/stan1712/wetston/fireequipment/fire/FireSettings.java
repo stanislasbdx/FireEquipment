@@ -36,7 +36,7 @@ public record FireSettings(
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Fire");
 	private static final String ROOT = "realisticFire.";
 
-	public record Features(boolean flashover, boolean backdraft, boolean heatAura, boolean weakBlocks, boolean collapse, boolean collapseEffects, boolean ash, boolean particles, boolean smoke, boolean scorch, boolean crack, boolean tnt) {}
+	public record Features(boolean flashover, boolean backdraft, boolean heatAura, boolean weakBlocks, boolean collapse, boolean collapseEffects, boolean ash, boolean particles, boolean scorch, boolean crack, boolean tnt) {}
 
 	public record Factors(double burnTime, double spread, double heat, double cooling, double water, double powder, double flashover, double heatAura, double weakBlocks, double ash, double scorch, double particles) {}
 
@@ -86,7 +86,6 @@ public record FireSettings(
 				feature(config, "collapseEffects"),
 				feature(config, "ash"),
 				feature(config, "particles"),
-				feature(config, "smoke"),
 				feature(config, "scorch"),
 				feature(config, "crack"),
 				feature(config, "tnt")

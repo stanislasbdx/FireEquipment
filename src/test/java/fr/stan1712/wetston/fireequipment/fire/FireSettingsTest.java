@@ -47,7 +47,6 @@ class FireSettingsTest {
 		config.set("realisticFire.features.ash", false);
 		config.set("realisticFire.features.flashover", false);
 		config.set("realisticFire.features.heatAura", false);
-		config.set("realisticFire.features.smoke", false);
 		config.set("realisticFire.features.crack", false);
 
 		final FireSettings settings = FireSettings.load(config);
@@ -55,7 +54,6 @@ class FireSettingsTest {
 		assertEquals(0, settings.ash().chance());
 		assertFalse(settings.confinement().flashover());
 		assertFalse(settings.heatAura().enabled());
-		assertFalse(settings.features().smoke());
 		assertFalse(settings.features().crack());
 	}
 
