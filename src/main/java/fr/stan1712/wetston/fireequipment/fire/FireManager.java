@@ -461,7 +461,7 @@ public class FireManager {
 		}
 
 		heatAura.tick();
-		coolHotSpots();
+		coolHotSpots(budget);
 		expireEphemeralFlames();
 	}
 
@@ -883,7 +883,7 @@ public class FireManager {
 		}
 	}
 
-	private void coolHotSpots() {
+	private void coolHotSpots(int budget) {
 		final double seconds = settings.updateInterval() / 20.0;
 		final ThreadLocalRandom random = ThreadLocalRandom.current();
 		final List<Block> candidates = new ArrayList<>();
@@ -909,7 +909,7 @@ public class FireManager {
 			return spots.isEmpty();
 		});
 
-		candidates.forEach(this::tryAutoIgnite);
+		candidates.stream().limit(Math.max(0, budget)).forEach(this::tryAutoIgnite);
 	}
 
 	private void ensureFlames(Block block) {
