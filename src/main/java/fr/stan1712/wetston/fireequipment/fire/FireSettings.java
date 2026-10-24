@@ -36,9 +36,9 @@ public record FireSettings(
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Fire");
 	private static final String ROOT = "realisticFire.";
 
-	public record Features(boolean flashover, boolean backdraft, boolean heatAura, boolean weakBlocks, boolean collapse, boolean collapseEffects, boolean ash, boolean particles, boolean scorch, boolean crack, boolean tnt) {}
+	public record Features(boolean flashover, boolean structure, boolean scorch, boolean heatAura, boolean tnt, boolean particles) {}
 
-	public record Factors(double burnTime, double spread, double heat, double cooling, double water, double powder, double flashover, double heatAura, double weakBlocks, double ash, double scorch, double particles) {}
+	public record Factors(double speed, double heat, double cooling, double extinguish, double effects) {}
 
 	public record Heat(double ignition, double growth, double dissipation, double extinguishThreshold, double reigniteThreshold, int reigniteDelay) {}
 
@@ -66,7 +66,7 @@ public record FireSettings(
 
 	public record Scorch(boolean enabled, double chancePerSecond, Set<Material> convertible, WeightedMaterials materials) {}
 
-	public record Collapse(boolean enabled, boolean effects, Set<Material> anchors) {}
+	public record Collapse(boolean enabled, boolean effects) {}
 
 	public boolean isWorldEnabled(World world) {
 		return enabled && worlds.contains(world.getName());
@@ -79,30 +79,18 @@ public record FireSettings(
 	public static FireSettings load(FileConfiguration config) {
 		final Features features = new Features(
 				feature(config, "flashover"),
-				feature(config, "backdraft"),
-				feature(config, "heatAura"),
-				feature(config, "weakBlocks"),
-				feature(config, "collapse"),
-				feature(config, "collapseEffects"),
-				feature(config, "ash"),
-				feature(config, "particles"),
+				feature(config, "structure"),
 				feature(config, "scorch"),
-				feature(config, "crack"),
-				feature(config, "tnt")
+				feature(config, "heatAura"),
+				feature(config, "tnt"),
+				feature(config, "particles")
 		);
 		final Factors factors = new Factors(
-				factor(config, "burnTime"),
-				factor(config, "spread"),
+				factor(config, "speed"),
 				factor(config, "heat"),
 				factor(config, "cooling"),
-				factor(config, "water"),
-				factor(config, "powder"),
-				factor(config, "flashover"),
-				factor(config, "heatAura"),
-				factor(config, "weakBlocks"),
-				factor(config, "ash"),
-				factor(config, "scorch"),
-				factor(config, "particles")
+				factor(config, "extinguish"),
+				factor(config, "effects")
 		);
 
 		return new FireSettings(
@@ -121,7 +109,7 @@ public record FireSettings(
 				),
 				new Spread(
 						FireDefaults.SPREAD_RADIUS,
-						FireDefaults.SPREAD_CHANCE * factors.spread(),
+						FireDefaults.SPREAD_CHANCE * factors.speed(),
 						FireDefaults.HEAT_PER_NEIGHBOR,
 						FireDefaults.UPWARD_BONUS
 				),
@@ -135,45 +123,48 @@ public record FireSettings(
 						FireDefaults.CONFINED_BURN_SPEED,
 						FireDefaults.CONFINED_HEAT_MULTIPLIER,
 						FireDefaults.CONFINED_DISSIPATION * factors.cooling(),
-						features.flashover() && factors.flashover() > 0,
-						Math.max(1, (int) Math.round(FireDefaults.FLASHOVER_RADIUS * Math.min(2, factors.flashover()))),
-						FireDefaults.FLASHOVER_HEAT / Math.max(0.01, factors.flashover()),
+						features.flashover(),
+						FireDefaults.FLASHOVER_RADIUS,
+						FireDefaults.FLASHOVER_HEAT,
 						seconds(FireDefaults.FLASHOVER_COOLDOWN_SECONDS),
-						Math.min(1, FireDefaults.FLASHOVER_IGNITE_CHANCE * factors.flashover()),
-						Math.min(1, FireDefaults.FLASHOVER_HEAT_RATIO * factors.flashover())
+						FireDefaults.FLASHOVER_IGNITE_CHANCE,
+						FireDefaults.FLASHOVER_HEAT_RATIO
 				),
 				new Water(
-						FireDefaults.HOSE_COOLING * factors.water(),
-						FireDefaults.POWDER_KNOCKDOWN * factors.powder(),
-						FireDefaults.POWDER_COOLING * factors.powder(),
-						FireDefaults.ADJACENT_WATER_COOLING * factors.water()
+						FireDefaults.HOSE_COOLING * factors.extinguish(),
+						FireDefaults.POWDER_KNOCKDOWN * factors.extinguish(),
+						FireDefaults.POWDER_COOLING * factors.extinguish(),
+						FireDefaults.ADJACENT_WATER_COOLING * factors.extinguish()
 				),
 				new HeatAura(
-						features.heatAura() && factors.heatAura() > 0,
+						features.heatAura(),
 						FireDefaults.AURA_RADIUS,
-						FireDefaults.AURA_WARN_THRESHOLD / Math.max(0.01, factors.heatAura()),
-						FireDefaults.AURA_IGNITE_THRESHOLD / Math.max(0.01, factors.heatAura()),
-						FireDefaults.AURA_FIRE_TICKS_PER_HEAT * factors.heatAura(),
+						FireDefaults.AURA_WARN_THRESHOLD,
+						FireDefaults.AURA_IGNITE_THRESHOLD,
+						FireDefaults.AURA_FIRE_TICKS_PER_HEAT,
 						FireDefaults.AURA_MAX_FIRE_TICKS
 				),
 				new WeakBlocks(
-						features.weakBlocks() && factors.weakBlocks() > 0,
+						features.structure(),
 						FireDefaults.WEAK_RADIUS,
-						FireDefaults.WEAK_BURST_HEAT / Math.max(0.01, factors.weakBlocks()),
-						Math.min(1, FireDefaults.WEAK_BURST_CHANCE * factors.weakBlocks()),
+						FireDefaults.WEAK_BURST_HEAT,
+						FireDefaults.WEAK_BURST_CHANCE,
 						MaterialMatcher.resolve(config.getStringList(ROOT + "weakBlocks.materials"))
 				),
-				loadAsh(config, features, factors),
-				new Collapse(
-						features.collapse(),
-						features.collapseEffects(),
-						MaterialMatcher.resolve(config.getStringList(ROOT + "collapse.anchors"))
+				new Ash(
+						features.scorch() ? Math.min(1, FireDefaults.ASH_CHANCE * factors.effects()) : 0,
+						WeightedMaterials.of(FireDefaults.ASH_MATERIALS, Material.GRAY_CONCRETE_POWDER),
+						features.particles(),
+						factors.effects(),
+						seconds(FireDefaults.ASH_PARTICLE_SECONDS),
+						(int) Math.round(FireDefaults.MAX_PARTICLES_PER_CYCLE * Math.max(1, factors.effects()))
 				),
+				new Collapse(features.structure(), features.structure()),
 				new Scorch(
-						features.scorch() && factors.scorch() > 0,
-						FireDefaults.SCORCH_CHANCE_PER_SECOND * factors.scorch(),
-						MaterialMatcher.resolve(config.getStringList(ROOT + "scorch.convertible")),
-						WeightedMaterials.read(config.getConfigurationSection(ROOT + "scorch.materials"), Material.COARSE_DIRT)
+						features.scorch() && factors.effects() > 0,
+						FireDefaults.SCORCH_CHANCE_PER_SECOND * factors.effects(),
+						FireDefaults.SCORCH_CONVERTIBLE,
+						WeightedMaterials.of(FireDefaults.SCORCH_MATERIALS, Material.COARSE_DIRT)
 				),
 				features,
 				factors,
@@ -193,17 +184,6 @@ public record FireSettings(
 		return (int) Math.round(value * 20);
 	}
 
-	private static Ash loadAsh(FileConfiguration config, Features features, Factors factors) {
-		return new Ash(
-				features.ash() ? Math.min(1, FireDefaults.ASH_CHANCE * factors.ash()) : 0,
-				WeightedMaterials.read(config.getConfigurationSection(ROOT + "ash.materials"), Material.GRAY_CONCRETE_POWDER),
-				features.particles(),
-				factors.particles(),
-				seconds(FireDefaults.ASH_PARTICLE_SECONDS),
-				(int) Math.round(FireDefaults.MAX_PARTICLES_PER_CYCLE * Math.max(1, factors.particles()))
-		);
-	}
-
 	private static Map<Material, FireCategory> loadCategories(FileConfiguration config, Factors factors) {
 		final Map<Material, FireCategory> categories = new EnumMap<>(Material.class);
 
@@ -221,7 +201,7 @@ public record FireSettings(
 
 			final FireCategory category = new FireCategory(
 					name,
-					seconds(categorySection.getDouble("burnTime") * Math.max(0.05, factors.burnTime())),
+					seconds(categorySection.getDouble("burnTime") / Math.max(0.05, factors.speed())),
 					categorySection.getDouble("ignitionChance"),
 					categorySection.getDouble("maxHeat"),
 					categorySection.getBoolean("ash", true)

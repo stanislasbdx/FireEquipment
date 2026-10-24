@@ -714,7 +714,7 @@ public class FireManager {
 	}
 
 	public Material rollCrack(Material material, double chance) {
-		final FireDefaults.Crack crack = settings.features().crack() ? FireDefaults.CRACKS.get(material) : null;
+		final FireDefaults.Crack crack = settings.features().structure() ? FireDefaults.CRACKS.get(material) : null;
 		if(crack == null || ThreadLocalRandom.current().nextDouble() >= chance * crack.weight()) {
 			return null;
 		}

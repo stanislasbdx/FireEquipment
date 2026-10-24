@@ -40,7 +40,7 @@ public class Backdraft {
 
 	public void onOpened(Block opening) {
 		final FireSettings settings = fire.getSettings();
-		if(!settings.features().backdraft() || !fire.isWorldEnabled(opening.getWorld())) {
+		if(!settings.features().flashover() || !fire.isWorldEnabled(opening.getWorld())) {
 			return;
 		}
 
@@ -71,7 +71,7 @@ public class Backdraft {
 
 	public Pressure assess(Block opening) {
 		final FireSettings settings = fire.getSettings();
-		if(!settings.features().backdraft() || !fire.isWorldEnabled(opening.getWorld())) {
+		if(!settings.features().flashover() || !fire.isWorldEnabled(opening.getWorld())) {
 			return Pressure.NONE;
 		}
 
@@ -92,7 +92,6 @@ public class Backdraft {
 			}
 		}
 
-		final double factor = Math.max(0.01, settings.factors().flashover());
 		Pressure worst = Pressure.NONE;
 
 		for(Block cell : sides) {
@@ -109,7 +108,7 @@ public class Backdraft {
 			}
 
 			final double thresholdCelsius = environment.confined() ? FireDefaults.BACKDRAFT_CONFINED_CELSIUS : FireDefaults.BACKDRAFT_VENTILATED_CELSIUS;
-			final double thresholdHeat = (thresholdCelsius - FireDefaults.AMBIENT_CELSIUS) / FireDefaults.CELSIUS_PER_HEAT / factor;
+			final double thresholdHeat = (thresholdCelsius - FireDefaults.AMBIENT_CELSIUS) / FireDefaults.CELSIUS_PER_HEAT;
 			final double ratio = heat / thresholdHeat;
 			if(ratio > worst.ratio()) {
 				worst = new Pressure(cell, ratio, environment.confined(), FireDefaults.celsius(heat));

@@ -1,33 +1,20 @@
 package fr.stan1712.wetston.fireequipment.fire;
 
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public record WeightedMaterials(NavigableMap<Integer, Material> weighted, int total, Material fallback) {
-	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Fire");
-
-	public static WeightedMaterials read(ConfigurationSection section, Material fallback) {
+	public static WeightedMaterials of(Map<Material, Integer> weights, Material fallback) {
 		final NavigableMap<Integer, Material> weighted = new TreeMap<>();
 		int total = 0;
 
-		if(section != null) {
-			for(String name : section.getKeys(false)) {
-				final Material material = Material.matchMaterial(name);
-				final int weight = section.getInt(name);
-
-				if(material == null || !material.isBlock() || weight <= 0) {
-					_log.warn("[WeightedMaterials] Invalid material {} in {}", name, section.getCurrentPath());
-					continue;
-				}
-				total += weight;
-				weighted.put(total - 1, material);
-			}
+		for(Map.Entry<Material, Integer> entry : weights.entrySet()) {
+			total += entry.getValue();
+			weighted.put(total - 1, entry.getKey());
 		}
 
 		return new WeightedMaterials(weighted, total, fallback);

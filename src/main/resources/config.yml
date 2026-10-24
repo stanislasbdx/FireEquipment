@@ -85,45 +85,17 @@ realisticFire:
     maxUpdatesPerCycle: 400
   features:
     flashover: true
-    backdraft: true
-    heatAura: true
-    weakBlocks: true
-    collapse: true
-    collapseEffects: true
-    ash: true
-    particles: true
+    structure: true
     scorch: true
-    crack: true
+    heatAura: true
     tnt: true
+    particles: true
   factors:
-    burnTime: 1.0
-    spread: 1.0
+    speed: 1.0
     heat: 1.0
     cooling: 1.0
-    water: 1.0
-    powder: 1.0
-    flashover: 1.0
-    heatAura: 1.0
-    weakBlocks: 1.0
-    ash: 1.0
-    scorch: 1.0
-    particles: 1.0
-  ash:
-    materials:
-      GRAY_CONCRETE_POWDER: 70
-      GRAVEL: 30
-  scorch:
-    convertible:
-      - "GRASS_BLOCK"
-      - "DIRT"
-      - "PODZOL"
-      - "MYCELIUM"
-      - "DIRT_PATH"
-      - "FARMLAND"
-      - "ROOTED_DIRT"
-    materials:
-      COARSE_DIRT: 60
-      DIRT: 40
+    extinguish: 1.0
+    effects: 1.0
   weakBlocks:
     materials:
       - "GLASS"
@@ -133,23 +105,6 @@ realisticFire:
       - "*_GLASS_PANE"
       - "#doors"
       - "#trapdoors"
-  collapse:
-    anchors:
-      - "#dirt"
-      - "#base_stone_overworld"
-      - "#base_stone_nether"
-      - "NETHERRACK"
-      - "END_STONE"
-      - "BEDROCK"
-      - "BARRIER"
-      - "REINFORCED_DEEPSLATE"
-      - "END_PORTAL_FRAME"
-      - "COMMAND_BLOCK"
-      - "CHAIN_COMMAND_BLOCK"
-      - "REPEATING_COMMAND_BLOCK"
-      - "STRUCTURE_BLOCK"
-      - "JIGSAW"
-      - "LIGHT"
   categories:
     wood:
       burnTime: 45

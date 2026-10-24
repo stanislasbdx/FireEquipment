@@ -4,10 +4,20 @@ import org.bukkit.Material;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 
 public final class FireDefaults {
 	private static final double SHATTER_WEIGHT = 0.15;
+
+	public static final Map<Material, Integer> ASH_MATERIALS = Map.of(Material.GRAY_CONCRETE_POWDER, 70, Material.GRAVEL, 30);
+	public static final Map<Material, Integer> SCORCH_MATERIALS = Map.of(Material.COARSE_DIRT, 60, Material.DIRT, 40);
+	public static final Set<Material> SCORCH_CONVERTIBLE = Collections.unmodifiableSet(EnumSet.of(
+			Material.GRASS_BLOCK, Material.DIRT, Material.PODZOL, Material.MYCELIUM, Material.DIRT_PATH, Material.FARMLAND, Material.ROOTED_DIRT));
+	public static final Set<Material> COLLAPSE_ANCHORS = Collections.unmodifiableSet(EnumSet.of(
+			Material.NETHERRACK, Material.END_STONE, Material.BEDROCK, Material.BARRIER, Material.REINFORCED_DEEPSLATE, Material.END_PORTAL_FRAME,
+			Material.COMMAND_BLOCK, Material.CHAIN_COMMAND_BLOCK, Material.REPEATING_COMMAND_BLOCK, Material.STRUCTURE_BLOCK, Material.JIGSAW, Material.LIGHT));
 
 	public record Crack(Material target, double weight) {}
 

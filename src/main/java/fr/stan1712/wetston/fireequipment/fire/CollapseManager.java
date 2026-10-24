@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -23,6 +24,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ public class CollapseManager {
 	private final Plugin plugin;
 	private final FireManager fire;
 	private final NamespacedKey burningKey;
+	private Set<Material> anchors;
 
 	public CollapseManager(Plugin plugin, FireManager fire) {
 		this.plugin = plugin;
@@ -97,7 +100,7 @@ public class CollapseManager {
 				final Block current = queue.poll();
 				piece.add(current);
 
-				if(piece.size() > FireDefaults.COLLAPSE_MAX_STRUCTURE || collapse.anchors().contains(current.getType()) || current.getY() <= world.getMinHeight()) {
+				if(piece.size() > FireDefaults.COLLAPSE_MAX_STRUCTURE || anchors().contains(current.getType()) || current.getY() <= world.getMinHeight()) {
 					return true;
 				}
 
@@ -116,6 +119,18 @@ public class CollapseManager {
 		finally {
 			checked.addAll(visited);
 		}
+	}
+
+	private Set<Material> anchors() {
+		if(anchors == null) {
+			final Set<Material> resolved = EnumSet.noneOf(Material.class);
+			resolved.addAll(FireDefaults.COLLAPSE_ANCHORS);
+			resolved.addAll(Tag.DIRT.getValues());
+			resolved.addAll(Tag.BASE_STONE_OVERWORLD.getValues());
+			resolved.addAll(Tag.BASE_STONE_NETHER.getValues());
+			anchors = resolved;
+		}
+		return anchors;
 	}
 
 	private static boolean isStructural(Block block) {

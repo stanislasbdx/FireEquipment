@@ -16,45 +16,48 @@ class FireSettingsTest {
 		assertEquals(FireDefaults.HOSE_COOLING, settings.water().hoseCooling());
 		assertEquals(FireDefaults.ASH_CHANCE, settings.ash().chance());
 		assertTrue(settings.confinement().flashover());
+		assertTrue(settings.collapse().enabled());
 		assertTrue(settings.features().tnt());
 	}
 
 	@Test
 	void appliesFactors() {
 		final YamlConfiguration config = new YamlConfiguration();
+		config.set("realisticFire.factors.speed", 2);
 		config.set("realisticFire.factors.heat", 2);
-		config.set("realisticFire.factors.flashover", 2);
-		config.set("realisticFire.factors.water", 0.5);
-		config.set("realisticFire.factors.heatAura", 2);
-		config.set("realisticFire.factors.scorch", 3);
-		config.set("realisticFire.factors.particles", 2);
+		config.set("realisticFire.factors.cooling", 0.5);
+		config.set("realisticFire.factors.extinguish", 0.5);
+		config.set("realisticFire.factors.effects", 2);
 
 		final FireSettings settings = FireSettings.load(config);
 
+		assertEquals(FireDefaults.SPREAD_CHANCE * 2, settings.spread().baseChance());
 		assertEquals(FireDefaults.HEAT_GROWTH * 2, settings.heat().growth());
-		assertEquals(FireDefaults.FLASHOVER_RADIUS * 2, settings.confinement().flashoverRadius());
-		assertEquals(FireDefaults.FLASHOVER_HEAT / 2, settings.confinement().flashoverHeat());
+		assertEquals(FireDefaults.OPEN_AIR_DISSIPATION / 2, settings.openAir().heatDissipation());
 		assertEquals(FireDefaults.HOSE_COOLING / 2, settings.water().hoseCooling());
-		assertEquals(FireDefaults.AURA_IGNITE_THRESHOLD / 2, settings.heatAura().igniteThreshold());
-		assertEquals(FireDefaults.SCORCH_CHANCE_PER_SECOND * 3, settings.scorch().chancePerSecond(), 1e-9);
-		assertEquals(2, settings.ash().particleDensity());
+		assertEquals(FireDefaults.POWDER_COOLING / 2, settings.water().powderCooling());
+		assertEquals(FireDefaults.SCORCH_CHANCE_PER_SECOND * 2, settings.scorch().chancePerSecond(), 1e-9);
+		assertEquals(FireDefaults.ASH_CHANCE * 2, settings.ash().chance(), 1e-9);
 		assertEquals(FireDefaults.MAX_PARTICLES_PER_CYCLE * 2, settings.ash().maxParticlesPerCycle());
+		assertEquals(FireDefaults.FLASHOVER_HEAT, settings.confinement().flashoverHeat());
 	}
 
 	@Test
 	void featuresSwitchMechanicsOff() {
 		final YamlConfiguration config = new YamlConfiguration();
-		config.set("realisticFire.features.ash", false);
 		config.set("realisticFire.features.flashover", false);
+		config.set("realisticFire.features.structure", false);
+		config.set("realisticFire.features.scorch", false);
 		config.set("realisticFire.features.heatAura", false);
-		config.set("realisticFire.features.crack", false);
 
 		final FireSettings settings = FireSettings.load(config);
 
-		assertEquals(0, settings.ash().chance());
 		assertFalse(settings.confinement().flashover());
+		assertFalse(settings.collapse().enabled());
+		assertFalse(settings.weakBlocks().enabled());
+		assertFalse(settings.scorch().enabled());
+		assertEquals(0, settings.ash().chance());
 		assertFalse(settings.heatAura().enabled());
-		assertFalse(settings.features().crack());
 	}
 
 	@Test
