@@ -17,9 +17,10 @@ Block changes go through `BlockPlaceEvent` / `BlockBreakEvent`, so region protec
 
 | Command | Description | Permission |
 | --- | --- | --- |
-| `/firequip help` | Help page | `firequip.info` |
-| `/firequip version` | Plugin version | `firequip.info` |
-| `/firequip reload` | Reload `config.yml` | `firequip.admin.reload` |
+| `/fequip help` | Help page | `firequip.info` |
+| `/fequip version` | Plugin version | `firequip.info` |
+| `/fequip reload` | Reload `config.yml` | `firequip.admin.reload` |
+| `/fequip fire <stats\|clear [radius]\|inspect>` | Realistic fire overview, extinguish or thermal camera | `firequip.admin.fire` / `firequip.inspect` |
 | `/fequip <hose\|pump\|extinguisher>` | Give yourself a tool | `firequip.tools.give` |
 
 ## Configuration

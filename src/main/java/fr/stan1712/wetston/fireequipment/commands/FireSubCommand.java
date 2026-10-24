@@ -86,7 +86,7 @@ class FireSubCommand implements SubCommand {
 				radius = -1;
 			}
 			if(radius <= 0) {
-				messages.box(sender, "/firequip fire clear [radius]");
+				messages.box(sender, "/fequip fire clear [radius]");
 				return;
 			}
 			cleared = fire.clear(BlockKey.of(player.getLocation().getBlock()), radius);

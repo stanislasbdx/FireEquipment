@@ -6,9 +6,9 @@ Core:
   NoPerms: "You don't have the permission !"
   Reload: "Config file reloaded !"
   HelpMsg:
-    Help: "Need help ? Type /firequip help"
-    VersionHelp: "Plugin's version ? Type /firequip version"
-    ReloadHelp: "You need to reload the config without reloading your server ? /firequip reload"
+    Help: "Need help ? Type /fequip help"
+    VersionHelp: "Plugin's version ? Type /fequip version"
+    ReloadHelp: "You need to reload the config without reloading your server ? /fequip reload"
     DHelp: "Shows a help page"
     DVersion: "Be able to know plugin's version"
     DReload: "Reload the config file"

@@ -1,7 +1,6 @@
 package fr.stan1712.wetston.fireequipment;
 
 import fr.stan1712.wetston.fireequipment.commands.FireEquipmentCommand;
-import fr.stan1712.wetston.fireequipment.commands.GiveCommand;
 import fr.stan1712.wetston.fireequipment.config.ConfigMigrator;
 import fr.stan1712.wetston.fireequipment.config.PluginSettings;
 import fr.stan1712.wetston.fireequipment.events.FireListener;
@@ -103,8 +102,7 @@ public final class Main extends JavaPlugin {
 	private void loadCommands() {
 		final String logStep = "loadCommands";
 
-		loadCommand(logStep, "firequip", new FireEquipmentCommand(this, settings, messages, fireManager));
-		loadCommand(logStep, "fequip", new GiveCommand(items, settings, messages));
+		loadCommand(logStep, "fequip", new FireEquipmentCommand(this, settings, messages, fireManager, items));
 
 		_log.info("[{}] Commands have been loaded !", logStep);
 	}

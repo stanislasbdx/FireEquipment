@@ -9,16 +9,10 @@ description: Roleplay Tools to enhance Firefigther gameplay in your server
 prefix: FireEquipment
 
 commands:
-  firequip:
-    description: Manage and get an overview of the plugin.
-    permission: firequip.info
-    usage: /firequip <help/version/reload/fire>
-    aliases: [fireequipment]
   fequip:
-    description: Gives you a firefighter tool.
-    permission: firequip.tools.give
-    usage: /fequip <item>
-    aliases: [equip]
+    description: Firefighter tools and realistic fire management.
+    usage: /fequip <help/version/reload/fire/hose/pump/extinguisher>
+    aliases: [equip, firequip, fireequipment]
 
 permissions:
   firequip.admin.fire:
