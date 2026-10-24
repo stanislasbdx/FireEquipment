@@ -513,11 +513,11 @@ public class FireManager {
 
 			spread(burningBlock, block, seconds, burningNeighbors, oxygen);
 			scorch(burningBlock, block, seconds);
-			if(burningBlock.heatRatio() >= FireDefaults.CRACK_HEAT_RATIO && ThreadLocalRandom.current().nextDouble() < FireDefaults.CRACK_CHANCE_PER_SECOND * seconds * 6) {
+			if(burningBlock.heatRatio() >= FireDefaults.CRACK_HEAT_RATIO) {
 				final BlockFace face = FireBlocks.FACES[ThreadLocalRandom.current().nextInt(FireBlocks.FACES.length)];
 				final Block neighbor = FireBlocks.neighbor(block, face);
 				if(neighbor != null) {
-					crack(neighbor);
+					crack(neighbor, FireDefaults.CRACK_CHANCE_PER_SECOND * seconds * FireBlocks.FACES.length);
 				}
 			}
 			if(burningBlock.heatRatio() >= 0.5 && ThreadLocalRandom.current().nextInt(20) == 0) {
@@ -691,7 +691,7 @@ public class FireManager {
 						}
 						continue;
 					}
-					if(random.nextDouble() < FireDefaults.CRACK_ENGULF_CHANCE && crack(target)) {
+					if(crack(target, FireDefaults.CRACK_ENGULF_CHANCE)) {
 						continue;
 					}
 
@@ -704,8 +704,8 @@ public class FireManager {
 		}
 	}
 
-	public boolean crack(Block block) {
-		final Material cracked = crackedVariant(block.getType());
+	public boolean crack(Block block, double chance) {
+		final Material cracked = rollCrack(block.getType(), chance);
 		if(cracked == null) {
 			return false;
 		}
@@ -713,8 +713,12 @@ public class FireManager {
 		return true;
 	}
 
-	public Material crackedVariant(Material material) {
-		return settings.features().crack() ? FireDefaults.CRACKS.get(material) : null;
+	public Material rollCrack(Material material, double chance) {
+		final FireDefaults.Crack crack = settings.features().crack() ? FireDefaults.CRACKS.get(material) : null;
+		if(crack == null || ThreadLocalRandom.current().nextDouble() >= chance * crack.weight()) {
+			return null;
+		}
+		return crack.target();
 	}
 
 	public void placeEphemeralFlame(Block cell) {

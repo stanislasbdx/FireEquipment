@@ -7,17 +7,21 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public final class FireDefaults {
-	public static final Map<Material, Material> CRACKS = crackTable();
+	private static final double SHATTER_WEIGHT = 0.15;
 
-	private static Map<Material, Material> crackTable() {
-		final Map<Material, Material> cracks = new EnumMap<>(Material.class);
-		cracks.put(Material.STONE_BRICKS, Material.CRACKED_STONE_BRICKS);
-		cracks.put(Material.DEEPSLATE_BRICKS, Material.CRACKED_DEEPSLATE_BRICKS);
-		cracks.put(Material.DEEPSLATE_TILES, Material.CRACKED_DEEPSLATE_TILES);
-		cracks.put(Material.NETHER_BRICKS, Material.CRACKED_NETHER_BRICKS);
-		cracks.put(Material.POLISHED_BLACKSTONE_BRICKS, Material.CRACKED_POLISHED_BLACKSTONE_BRICKS);
-		cracks.put(Material.STONE, Material.COBBLESTONE);
-		cracks.put(Material.DEEPSLATE, Material.COBBLED_DEEPSLATE);
+	public record Crack(Material target, double weight) {}
+
+	public static final Map<Material, Crack> CRACKS = crackTable();
+
+	private static Map<Material, Crack> crackTable() {
+		final Map<Material, Crack> cracks = new EnumMap<>(Material.class);
+		cracks.put(Material.STONE_BRICKS, new Crack(Material.CRACKED_STONE_BRICKS, 1));
+		cracks.put(Material.DEEPSLATE_BRICKS, new Crack(Material.CRACKED_DEEPSLATE_BRICKS, 1));
+		cracks.put(Material.DEEPSLATE_TILES, new Crack(Material.CRACKED_DEEPSLATE_TILES, 1));
+		cracks.put(Material.NETHER_BRICKS, new Crack(Material.CRACKED_NETHER_BRICKS, 1));
+		cracks.put(Material.POLISHED_BLACKSTONE_BRICKS, new Crack(Material.CRACKED_POLISHED_BLACKSTONE_BRICKS, 1));
+		cracks.put(Material.STONE, new Crack(Material.COBBLESTONE, SHATTER_WEIGHT));
+		cracks.put(Material.DEEPSLATE, new Crack(Material.COBBLED_DEEPSLATE, SHATTER_WEIGHT));
 		return Collections.unmodifiableMap(cracks);
 	}
 
@@ -101,9 +105,10 @@ public final class FireDefaults {
 	public static final int SCORCH_DEPTH = 2;
 
 	public static final double CRACK_HEAT_RATIO = 0.8;
-	public static final double CRACK_CHANCE_PER_SECOND = 0.05;
-	public static final double CRACK_ENGULF_CHANCE = 0.5;
-	public static final double CRACK_COLLAPSE_CHANCE = 0.3;
+	public static final double CRACK_CHANCE_PER_SECOND = 0.01;
+	public static final double CRACK_ENGULF_CHANCE = 0.15;
+	public static final double CRACK_FALLING_CHANCE = 0.3;
+	public static final double CRACK_COLLAPSE_CHANCE = 0.1;
 
 	public static final int TNT_FUSE_TICKS = 80;
 	public static final double TNT_PRIME_HEAT = 30;

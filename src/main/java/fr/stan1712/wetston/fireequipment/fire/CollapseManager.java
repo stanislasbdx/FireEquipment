@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class CollapseManager {
 	private final Plugin plugin;
@@ -64,8 +63,8 @@ public class CollapseManager {
 		if(collapsed) {
 			for(BlockFace face : FireBlocks.FACES) {
 				final Block neighbor = FireBlocks.neighbor(removed, face);
-				if(neighbor != null && ThreadLocalRandom.current().nextDouble() < FireDefaults.CRACK_COLLAPSE_CHANCE) {
-					fire.crack(neighbor);
+				if(neighbor != null) {
+					fire.crack(neighbor, FireDefaults.CRACK_COLLAPSE_CHANCE);
 				}
 			}
 		}
@@ -194,7 +193,7 @@ public class CollapseManager {
 	}
 
 	private void fall(Block block, BlockData originalData) {
-		final Material cracked = fire.crackedVariant(originalData.getMaterial());
+		final Material cracked = fire.rollCrack(originalData.getMaterial(), FireDefaults.CRACK_FALLING_CHANCE);
 		final BlockData data = cracked == null ? originalData : cracked.createBlockData();
 		final Location location = block.getLocation().add(0.5, 0, 0.5);
 		final BurningBlock burningBlock = fire.get(BlockKey.of(block));
