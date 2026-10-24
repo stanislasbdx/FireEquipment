@@ -8,11 +8,13 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Bed;
+import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
@@ -123,7 +125,11 @@ public class CollapseManager {
 			}
 
 			final BlockData data = block.getBlockData();
-			if(data instanceof Bisected || data instanceof Bed || block.getState() instanceof Container) {
+			if(block.getState() instanceof Container) {
+				moveContainer(block);
+				continue;
+			}
+			if(data instanceof Bisected || data instanceof Bed) {
 				final BurningBlock burningBlock = fire.get(BlockKey.of(block));
 				if(burningBlock != null) {
 					fire.extinguish(burningBlock);
@@ -134,6 +140,45 @@ public class CollapseManager {
 
 			fall(block, data);
 		}
+	}
+
+	private void moveContainer(Block block) {
+		final Block target = landing(block);
+		if(target == null) {
+			return;
+		}
+
+		final BurningBlock burningBlock = fire.get(BlockKey.of(block));
+		if(burningBlock != null) {
+			fire.extinguish(burningBlock);
+		}
+
+		final BlockState snapshot = block.getState();
+		((Container) block.getState()).getInventory().clear();
+		block.setType(Material.AIR);
+
+		final BlockState moved = snapshot.copy(target.getLocation());
+		if(moved.getBlockData() instanceof Chest chest && chest.getType() != Chest.Type.SINGLE) {
+			chest.setType(Chest.Type.SINGLE);
+			moved.setBlockData(chest);
+		}
+		moved.update(true, false);
+	}
+
+	private static Block landing(Block block) {
+		final World world = block.getWorld();
+
+		for(int y = block.getY() - 1; y >= world.getMinHeight(); y--) {
+			final Block below = FireBlocks.blockAt(world, block.getX(), y, block.getZ());
+			if(below == null) {
+				return null;
+			}
+			if(below.getType().isSolid()) {
+				return y + 1 == block.getY() ? null : world.getBlockAt(block.getX(), y + 1, block.getZ());
+			}
+		}
+
+		return null;
 	}
 
 	private void fall(Block block, BlockData data) {
