@@ -27,8 +27,8 @@ Core:
     Cleared: "burning blocks extinguished"
     PlayersOnly: "Only players can do that"
     Inspect:
-      On: "Inspect mode enabled"
-      Off: "Inspect mode disabled"
+      Started: "Inspect mode enabled"
+      Stopped: "Inspect mode disabled"
       Disabled: "Realistic fire is disabled in this world"
       Camera: "Thermal camera"
       Inert: "Inert"

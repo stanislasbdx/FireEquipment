@@ -67,7 +67,7 @@ class FireSubCommand implements SubCommand {
 		}
 
 		final boolean enabled = inspector.toggle(player);
-		messages.box(sender, messages.get(enabled ? "Core.FireMsg.Inspect.On" : "Core.FireMsg.Inspect.Off"));
+		messages.box(sender, messages.get(enabled ? "Core.FireMsg.Inspect.Started" : "Core.FireMsg.Inspect.Stopped"));
 	}
 
 	private void clear(CommandSender sender, String[] args) {
