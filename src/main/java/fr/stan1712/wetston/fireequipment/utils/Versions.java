@@ -4,9 +4,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Versions {
-	private static final Pattern GAME_VERSION = Pattern.compile("^(\\d+)\\.(\\d+)");
+	private static final Pattern GAME_VERSION = Pattern.compile("^(\\d+)\\.(\\d+)(?:\\.(\\d+))?");
 	private static final int FIRST_YEAR_BASED_MAJOR = 26;
 	private static final int MIN_LEGACY_MINOR = 21;
+	private static final int MIN_LEGACY_PATCH = 4;
 
 	private Versions() {
 		throw new IllegalStateException("Utility class");
@@ -25,11 +26,12 @@ public final class Versions {
 
 		final int major = Integer.parseInt(matcher.group(1));
 		final int minor = Integer.parseInt(matcher.group(2));
+		final int patch = matcher.group(3) == null ? 0 : Integer.parseInt(matcher.group(3));
 
 		if(major >= FIRST_YEAR_BASED_MAJOR) return Support.SUPPORTED;
 		if(major != 1) return Support.UNSUPPORTED;
 
-		return minor >= MIN_LEGACY_MINOR ? Support.SUPPORTED : Support.UNSUPPORTED;
+		return minor > MIN_LEGACY_MINOR || (minor == MIN_LEGACY_MINOR && patch >= MIN_LEGACY_PATCH) ? Support.SUPPORTED : Support.UNSUPPORTED;
 	}
 
 	public static boolean isServerTypeSupported(String serverName, String serverVersion) {

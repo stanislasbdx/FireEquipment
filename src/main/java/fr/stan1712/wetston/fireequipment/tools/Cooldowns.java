@@ -2,10 +2,10 @@ package fr.stan1712.wetston.fireequipment.tools;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 public class Cooldowns {
-	private final Map<UUID, Long> lastUse = new ConcurrentHashMap<>();
+	private final Map<UUID, Long> lastUse = new HashMap<>();
 
 	public boolean tryUse(UUID id, long nowMillis, long cooldownMillis) {
 		final Long previous = lastUse.get(id);

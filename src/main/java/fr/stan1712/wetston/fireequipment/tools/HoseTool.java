@@ -1,6 +1,7 @@
 package fr.stan1712.wetston.fireequipment.tools;
 
 import fr.stan1712.wetston.fireequipment.config.PluginSettings;
+import fr.stan1712.wetston.fireequipment.fire.FireManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,17 +15,20 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HoseTool implements FireTool {
 	private final Plugin plugin;
 	private final PluginSettings settings;
-	private final Set<Block> placedWater = new HashSet<>();
+	private final FireManager fire;
+	private final Map<Block, Integer> placedWater = new HashMap<>();
+	private int waterToken;
 
-	public HoseTool(Plugin plugin, PluginSettings settings) {
+	public HoseTool(Plugin plugin, PluginSettings settings, FireManager fire) {
 		this.plugin = plugin;
 		this.settings = settings;
+		this.fire = fire;
 	}
 
 	@Override
@@ -39,35 +43,47 @@ public class HoseTool implements FireTool {
 
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 15, 10));
 
-		for(int step = 0; step <= settings.tool(ToolType.HOSE).range(); step++) {
+		for(int step = 0; step < settings.tool(ToolType.HOSE).range(); step++) {
 			loc.add(loc.getDirection());
 			world.playSound(loc, Sound.ENTITY_DOLPHIN_SPLASH, 5, 5);
 			world.spawnParticle(Particle.SPLASH, loc, 20);
 			world.spawnParticle(Particle.FALLING_WATER, loc, 10);
 
-			if(step >= 1 && Math.random() >= 0.2) {
-				final Block block = world.getBlockAt(loc);
-				if(!block.isEmpty() && block.getType() != Material.FIRE) break;
-				if(!Protection.canPlace(player, block)) break;
+			final Block block = world.getBlockAt(loc);
+			fire.applyWater(block);
+			if(step < 1) continue;
 
-				block.setType(Material.WATER);
-				scheduleWaterRemoval(block);
+			if(block.getType() == Material.WATER) {
+				if(placedWater.containsKey(block)) scheduleWaterRemoval(block);
+				continue;
 			}
+			if(fire.isShatterable(block)) {
+				if(!Protection.canBreak(player, block)) break;
+				fire.shatter(block);
+				continue;
+			}
+			if(!block.isEmpty() && block.getType() != Material.FIRE) break;
+			if(Math.random() < 0.2) continue;
+			if(!Protection.canPlace(player, block)) break;
+
+			block.setType(Material.WATER);
+			scheduleWaterRemoval(block);
 		}
 	}
 
 	@Override
 	public void shutdown() {
-		new ArrayList<>(placedWater).forEach(this::removeWater);
+		new ArrayList<>(placedWater.keySet()).forEach(block -> removeWater(block, placedWater.get(block)));
 	}
 
 	private void scheduleWaterRemoval(Block block) {
-		placedWater.add(block);
-		Bukkit.getScheduler().runTaskLater(plugin, () -> removeWater(block), settings.hoseWaterLifetimeTicks());
+		final int token = ++waterToken;
+		placedWater.put(block, token);
+		Bukkit.getScheduler().runTaskLater(plugin, () -> removeWater(block, token), settings.hoseWaterLifetimeTicks());
 	}
 
-	private void removeWater(Block block) {
-		if(placedWater.remove(block) && block.getType() == Material.WATER) {
+	private void removeWater(Block block, int token) {
+		if(placedWater.remove(block, token) && block.getType() == Material.WATER) {
 			block.setType(Material.AIR);
 		}
 	}

@@ -1,6 +1,7 @@
 package fr.stan1712.wetston.fireequipment.commands;
 
 import fr.stan1712.wetston.fireequipment.config.PluginSettings;
+import fr.stan1712.wetston.fireequipment.fire.FireManager;
 import fr.stan1712.wetston.fireequipment.messages.Messages;
 import fr.stan1712.wetston.fireequipment.tools.ItemFactory;
 import org.bukkit.Material;
@@ -19,17 +20,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class CommandsTest {
 	private ServerMock server;
 	private FireEquipmentCommand fireEquipment;
-	private GiveCommand give;
+	private Plugin plugin;
 
 	@BeforeEach
 	void setUp() {
 		server = MockBukkit.mock();
-		final Plugin plugin = MockBukkit.createMockPlugin();
+		plugin = MockBukkit.createMockPlugin();
 		final PluginSettings settings = new PluginSettings(plugin);
 		final Messages messages = new Messages(plugin, settings);
 
-		fireEquipment = new FireEquipmentCommand(plugin, settings, messages);
-		give = new GiveCommand(new ItemFactory(plugin, settings), settings, messages);
+		fireEquipment = new FireEquipmentCommand(plugin, settings, messages, new FireManager(plugin), new ItemFactory(plugin, settings));
 	}
 
 	@AfterEach
@@ -38,21 +38,34 @@ class CommandsTest {
 	}
 
 	@Test
+	void completesFireActionsByPermission() {
+		final PlayerMock op = server.addPlayer();
+		op.setOp(true);
+		final PlayerMock inspector = server.addPlayer();
+		inspector.addAttachment(plugin, "firequip.info", true);
+		inspector.addAttachment(plugin, "firequip.inspect", true);
+
+		assertEquals(List.of("stats", "clear", "inspect"), fireEquipment.onTabComplete(op, null, "fequip", new String[]{"fire", ""}));
+		assertEquals(List.of("inspect"), fireEquipment.onTabComplete(inspector, null, "fequip", new String[]{"fire", ""}));
+		assertEquals(List.of("5", "50"), fireEquipment.onTabComplete(op, null, "fequip", new String[]{"fire", "clear", "5"}));
+	}
+
+	@Test
 	void completesSubCommandsForOperators() {
 		final PlayerMock op = server.addPlayer();
 		op.setOp(true);
 
-		assertEquals(List.of("help", "version", "reload"), fireEquipment.onTabComplete(op, null, "firequip", new String[]{""}));
-		assertEquals(List.of("reload"), fireEquipment.onTabComplete(op, null, "firequip", new String[]{"R"}));
-		assertEquals(List.of(), fireEquipment.onTabComplete(op, null, "firequip", new String[]{"reload", ""}));
+		assertEquals(List.of("help", "version", "reload", "fire", "hose", "pump", "extinguisher"), fireEquipment.onTabComplete(op, null, "fequip", new String[]{""}));
+		assertEquals(List.of("reload"), fireEquipment.onTabComplete(op, null, "fequip", new String[]{"R"}));
+		assertEquals(List.of(), fireEquipment.onTabComplete(op, null, "fequip", new String[]{"reload", ""}));
 	}
 
 	@Test
 	void completesNothingWithoutPermission() {
 		final PlayerMock player = server.addPlayer();
 
-		assertEquals(List.of(), fireEquipment.onTabComplete(player, null, "firequip", new String[]{""}));
-		assertEquals(List.of(), give.onTabComplete(player, null, "fequip", new String[]{""}));
+		assertEquals(List.of(), fireEquipment.onTabComplete(player, null, "fequip", new String[]{""}));
+		assertEquals(List.of(), fireEquipment.onTabComplete(player, null, "fequip", new String[]{"h"}));
 	}
 
 	@Test
@@ -60,8 +73,8 @@ class CommandsTest {
 		final PlayerMock op = server.addPlayer();
 		op.setOp(true);
 
-		assertEquals(List.of("hose", "pump", "extinguisher"), give.onTabComplete(op, null, "fequip", new String[]{""}));
-		assertEquals(List.of("extinguisher"), give.onTabComplete(op, null, "fequip", new String[]{"e"}));
+		assertEquals(List.of("hose"), fireEquipment.onTabComplete(op, null, "fequip", new String[]{"ho"}));
+		assertEquals(List.of("extinguisher"), fireEquipment.onTabComplete(op, null, "fequip", new String[]{"e"}));
 	}
 
 	@Test
@@ -69,7 +82,7 @@ class CommandsTest {
 		final PlayerMock op = server.addPlayer();
 		op.setOp(true);
 
-		give.onCommand(op, null, "fequip", new String[]{"hose"});
+		fireEquipment.onCommand(op, null, "fequip", new String[]{"hose"});
 
 		assertTrue(op.getInventory().contains(Material.GOLDEN_HOE));
 	}
@@ -78,14 +91,14 @@ class CommandsTest {
 	void giveRejectsPlayersWithoutPermission() {
 		final PlayerMock player = server.addPlayer();
 
-		give.onCommand(player, null, "fequip", new String[]{"hose"});
+		fireEquipment.onCommand(player, null, "fequip", new String[]{"hose"});
 
 		assertFalse(player.getInventory().contains(Material.GOLDEN_HOE));
 	}
 
 	@Test
 	void consoleGetsAnAnswer() {
-		give.onCommand(server.getConsoleSender(), null, "fequip", new String[]{"hose"});
+		fireEquipment.onCommand(server.getConsoleSender(), null, "fequip", new String[]{"hose"});
 
 		assertNotNull(server.getConsoleSender().nextMessage());
 	}

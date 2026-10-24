@@ -49,10 +49,6 @@ public class Messages {
 		}
 	}
 
-	public void sendKey(CommandSender to, String path) {
-		send(to, get(path));
-	}
-
 	public void noPermission(CommandSender to) {
 		send(to, "[" + settings.prefix() + "] " + get("Core.NoPerms"));
 	}

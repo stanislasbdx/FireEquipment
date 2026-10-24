@@ -1,29 +1,57 @@
 Version: 0
 Prefix: FireEquipment
-ShortPrefix: "&6[&eFireEquip&6]"
 
 Core:
   NoPerms: "You don't have the permission !"
   Reload: "Config file reloaded !"
   HelpMsg:
-    Help: "Need help ? Type /firequip help"
-    VersionHelp: "Plugin's version ? Type /firequip version"
-    ReloadHelp: "You need to reload the config without reloading your server ? /firequip reload"
+    Help: "Need help ? Type /fequip help"
+    VersionHelp: "Plugin's version ? Type /fequip version"
+    ReloadHelp: "You need to reload the config without reloading your server ? /fequip reload"
     DHelp: "Shows a help page"
     DVersion: "Be able to know plugin's version"
     DReload: "Reload the config file"
     DGive: "Be able to give yourself an item"
+    DFire: "Realistic fire overview or extinguish fires"
   GiveMsg:
     Home: "What item do you need ?"
     Hose: "You got a fire hose"
     Pump: "You got a pump"
     Extinguisher: "You got an extinguisher"
+  FireMsg:
+    Status: "Realistic fire"
+    Worlds: "Worlds"
+    Burning: "Burning blocks"
+    Smouldering: "Smouldering blocks"
+    Cleared: "burning blocks extinguished"
+    PlayersOnly: "Only players can do that"
+    Inspect:
+      Started: "Inspect mode enabled"
+      Stopped: "Inspect mode disabled"
+      Disabled: "Realistic fire is disabled in this world"
+      Camera: "Thermal camera"
+      Inert: "Inert"
+      OpenAir: "Open air"
+      Ventilated: "Ventilated"
+      Confined: "Confined"
+      Pressure:
+        Opening: "Opening"
+        Label: "Pressure"
+        Low: "Low"
+        Moderate: "Moderate"
+        Critical: "Critical"
+      Categories:
+        wood: "Wood"
+        foliage: "Vegetation"
+        textile: "Textile"
+        paper: "Paper"
+        fuel: "Fuel"
 
 Equipment:
   Hose:
     displayName: "Fire Hose"
     usage: "Right-click to throw water"
-    range: 5
+    range: 25
     cooldown: 10
     waterLifetime: 60
     itemModel: "fireequipment:hose"
@@ -46,3 +74,81 @@ ResourcePack:
   sha1: ""
   prompt: "FireEquipment textures"
   force: false
+
+realisticFire:
+  enabled: true
+  worlds: []
+  performance:
+    updateInterval: 10
+    maxBurningBlocks: 3000
+    maxUpdatesPerCycle: 400
+  features:
+    flashover: true
+    structure: true
+    scorch: true
+    heatAura: true
+    tnt: true
+    particles: true
+  factors:
+    speed: 1.0
+    heat: 1.0
+    cooling: 1.0
+    extinguish: 1.0
+    effects: 1.0
+  weakBlocks:
+    materials:
+      - "GLASS"
+      - "TINTED_GLASS"
+      - "*_STAINED_GLASS"
+      - "GLASS_PANE"
+      - "*_GLASS_PANE"
+      - "#doors"
+      - "#trapdoors"
+  categories:
+    wood:
+      burnTime: 45
+      ignitionChance: 0.6
+      maxHeat: 100
+      materials:
+        - "#logs_that_burn"
+        - "#planks"
+        - "#wooden_stairs"
+        - "#wooden_slabs"
+        - "#wooden_fences"
+        - "#fence_gates"
+        - "#wooden_doors"
+        - "#wooden_trapdoors"
+    foliage:
+      burnTime: 6
+      ignitionChance: 1.0
+      maxHeat: 60
+      ash: false
+      materials:
+        - "#leaves"
+        - "#flowers"
+        - "SHORT_GRASS"
+        - "TALL_GRASS"
+        - "FERN"
+        - "LARGE_FERN"
+        - "HAY_BLOCK"
+        - "DRIED_KELP_BLOCK"
+    textile:
+      burnTime: 10
+      ignitionChance: 0.9
+      maxHeat: 70
+      materials:
+        - "#wool"
+        - "#wool_carpets"
+        - "#beds"
+    paper:
+      burnTime: 20
+      ignitionChance: 0.8
+      maxHeat: 80
+      materials:
+        - "BOOKSHELF"
+    fuel:
+      burnTime: 300
+      ignitionChance: 0.3
+      maxHeat: 150
+      materials:
+        - "COAL_BLOCK"
