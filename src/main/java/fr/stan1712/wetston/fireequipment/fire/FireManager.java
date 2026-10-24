@@ -278,6 +278,14 @@ public class FireManager {
 		}
 	}
 
+	public boolean isShatterable(Block block) {
+		return isWorldEnabled(block.getWorld()) && burster.isShatterable(block);
+	}
+
+	public void shatter(Block block) {
+		burster.burst(block, settings.weakBlocks().radius());
+	}
+
 	public void loadChunk(Chunk chunk) {
 		for(FireStorage.StoredFire stored : storage.load(chunk)) {
 			final Block block = chunk.getWorld().getBlockAt(stored.key().x(), stored.key().y(), stored.key().z());

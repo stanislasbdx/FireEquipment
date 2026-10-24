@@ -44,7 +44,12 @@ public class WeakBlockBurster {
 		}
 	}
 
-	private void burst(Block block, int radius) {
+	public boolean isShatterable(Block block) {
+		final FireSettings.WeakBlocks weakBlocks = fire.getSettings().weakBlocks();
+		return weakBlocks.enabled() && weakBlocks.materials().contains(block.getType()) && block.getType().name().contains("GLASS");
+	}
+
+	public void burst(Block block, int radius) {
 		final BlockKey key = BlockKey.of(block);
 		final BurningBlock burningBlock = fire.get(key);
 		if(burningBlock != null) {

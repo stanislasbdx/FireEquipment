@@ -15,14 +15,15 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HoseTool implements FireTool {
 	private final Plugin plugin;
 	private final PluginSettings settings;
 	private final FireManager fire;
-	private final Set<Block> placedWater = new HashSet<>();
+	private final Map<Block, Integer> placedWater = new HashMap<>();
+	private int waterToken;
 
 	public HoseTool(Plugin plugin, PluginSettings settings, FireManager fire) {
 		this.plugin = plugin;
@@ -48,31 +49,41 @@ public class HoseTool implements FireTool {
 			world.spawnParticle(Particle.SPLASH, loc, 20);
 			world.spawnParticle(Particle.FALLING_WATER, loc, 10);
 
-			fire.applyWater(world.getBlockAt(loc));
+			final Block block = world.getBlockAt(loc);
+			fire.applyWater(block);
+			if(step < 1) continue;
 
-			if(step >= 1 && Math.random() >= 0.2) {
-				final Block block = world.getBlockAt(loc);
-				if(!block.isEmpty() && block.getType() != Material.FIRE) break;
-				if(!Protection.canPlace(player, block)) break;
-
-				block.setType(Material.WATER);
-				scheduleWaterRemoval(block);
+			if(block.getType() == Material.WATER) {
+				if(placedWater.containsKey(block)) scheduleWaterRemoval(block);
+				continue;
 			}
+			if(fire.isShatterable(block)) {
+				if(!Protection.canBreak(player, block)) break;
+				fire.shatter(block);
+				continue;
+			}
+			if(!block.isEmpty() && block.getType() != Material.FIRE) break;
+			if(Math.random() < 0.2) continue;
+			if(!Protection.canPlace(player, block)) break;
+
+			block.setType(Material.WATER);
+			scheduleWaterRemoval(block);
 		}
 	}
 
 	@Override
 	public void shutdown() {
-		new ArrayList<>(placedWater).forEach(this::removeWater);
+		new ArrayList<>(placedWater.keySet()).forEach(block -> removeWater(block, placedWater.get(block)));
 	}
 
 	private void scheduleWaterRemoval(Block block) {
-		placedWater.add(block);
-		Bukkit.getScheduler().runTaskLater(plugin, () -> removeWater(block), settings.hoseWaterLifetimeTicks());
+		final int token = ++waterToken;
+		placedWater.put(block, token);
+		Bukkit.getScheduler().runTaskLater(plugin, () -> removeWater(block, token), settings.hoseWaterLifetimeTicks());
 	}
 
-	private void removeWater(Block block) {
-		if(placedWater.remove(block) && block.getType() == Material.WATER) {
+	private void removeWater(Block block, int token) {
+		if(placedWater.remove(block, token) && block.getType() == Material.WATER) {
 			block.setType(Material.AIR);
 		}
 	}
