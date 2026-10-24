@@ -49,6 +49,7 @@ class CommandsTest {
 
 		assertEquals(List.of("stats", "clear", "inspect"), fireEquipment.onTabComplete(op, null, "firequip", new String[]{"fire", ""}));
 		assertEquals(List.of("inspect"), fireEquipment.onTabComplete(inspector, null, "firequip", new String[]{"fire", ""}));
+		assertEquals(List.of("5", "50"), fireEquipment.onTabComplete(op, null, "firequip", new String[]{"fire", "clear", "5"}));
 	}
 
 	@Test

@@ -13,6 +13,7 @@ import java.util.Locale;
 class FireSubCommand implements SubCommand {
 	private static final String ADMIN_PERMISSION = "firequip.admin.fire";
 	private static final String INSPECT = "inspect";
+	private static final List<String> CLEAR_RADII = List.of("5", "10", "20", "50");
 
 	private final FireManager fire;
 	private final Messages messages;
@@ -49,6 +50,9 @@ class FireSubCommand implements SubCommand {
 
 	@Override
 	public List<String> complete(CommandSender sender, String[] args) {
+		if(args.length == 3 && args[1].equalsIgnoreCase("clear") && sender instanceof Player && sender.hasPermission(ADMIN_PERMISSION)) {
+			return CLEAR_RADII.stream().filter(radius -> radius.startsWith(args[2])).toList();
+		}
 		if(args.length != 2) return List.of();
 
 		final String typed = args[1].toLowerCase(Locale.ROOT);
@@ -69,13 +73,23 @@ class FireSubCommand implements SubCommand {
 	private void clear(CommandSender sender, String[] args) {
 		int cleared;
 
-		if(args.length >= 3 && sender instanceof Player player) {
+		if(args.length >= 3) {
+			if(!(sender instanceof Player player)) {
+				messages.box(sender, messages.get("Core.FireMsg.PlayersOnly"));
+				return;
+			}
+
+			int radius;
 			try {
-				cleared = fire.clear(BlockKey.of(player.getLocation().getBlock()), Integer.parseInt(args[2]));
+				radius = Integer.parseInt(args[2]);
 			} catch (NumberFormatException e) {
+				radius = -1;
+			}
+			if(radius <= 0) {
 				messages.box(sender, "/firequip fire clear [radius]");
 				return;
 			}
+			cleared = fire.clear(BlockKey.of(player.getLocation().getBlock()), radius);
 		} else {
 			cleared = fire.clear(null, 0);
 		}
