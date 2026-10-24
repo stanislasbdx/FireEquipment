@@ -37,7 +37,7 @@ public record FireSettings(
 
 	public record Features(boolean flashover, boolean heatAura, boolean weakBlocks, boolean collapse, boolean collapseEffects, boolean ash, boolean particles, boolean scorch, boolean tnt) {}
 
-	public record Factors(double burnTime, double spread, double heat, double cooling, double water, double powder, double flashover, double heatAura, double weakBlocks, double ash) {}
+	public record Factors(double burnTime, double spread, double heat, double cooling, double water, double powder, double flashover, double heatAura, double weakBlocks, double ash, double scorch) {}
 
 	public record Heat(double ignition, double growth, double dissipation, double extinguishThreshold, double reigniteThreshold, int reigniteDelay) {}
 
@@ -63,7 +63,7 @@ public record FireSettings(
 		}
 	}
 
-	public record Scorch(boolean enabled, Set<Material> convertible, WeightedMaterials materials) {}
+	public record Scorch(boolean enabled, double chancePerSecond, Set<Material> convertible, WeightedMaterials materials) {}
 
 	public record Collapse(boolean enabled, boolean effects, Set<Material> anchors) {}
 
@@ -97,7 +97,8 @@ public record FireSettings(
 				factor(config, "flashover"),
 				factor(config, "heatAura"),
 				factor(config, "weakBlocks"),
-				factor(config, "ash")
+				factor(config, "ash"),
+				factor(config, "scorch")
 		);
 
 		return new FireSettings(
@@ -165,7 +166,8 @@ public record FireSettings(
 						MaterialMatcher.resolve(config.getStringList(ROOT + "collapse.anchors"))
 				),
 				new Scorch(
-						features.scorch(),
+						features.scorch() && factors.scorch() > 0,
+						FireDefaults.SCORCH_CHANCE_PER_SECOND * factors.scorch(),
 						MaterialMatcher.resolve(config.getStringList(ROOT + "scorch.convertible")),
 						WeightedMaterials.read(config.getConfigurationSection(ROOT + "scorch.materials"), Material.COARSE_DIRT)
 				),

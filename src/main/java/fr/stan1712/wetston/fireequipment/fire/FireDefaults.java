@@ -64,8 +64,10 @@ public final class FireDefaults {
 	public static final double HOT_SPOT_HEAT_SHARE = 0.5;
 	public static final double HOT_SPOT_IGNITE_CHANCE = 0.2;
 
-	public static final double SCORCH_HEAT_RATIO = 0.7;
-	public static final double SCORCH_CHANCE_PER_SECOND = 0.05;
+	public static final double SCORCH_HEAT_RATIO = 0.5;
+	public static final double SCORCH_CHANCE_PER_SECOND = 0.2;
+	public static final int SCORCH_RADIUS = 2;
+	public static final int SCORCH_DEPTH = 2;
 
 	public static final int TNT_FUSE_TICKS = 80;
 	public static final double TNT_PRIME_HEAT = 30;

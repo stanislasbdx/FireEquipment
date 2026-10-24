@@ -597,16 +597,21 @@ public class FireManager {
 	private void scorch(BurningBlock burningBlock, Block block, double seconds) {
 		final FireSettings.Scorch scorch = settings.scorch();
 		final ThreadLocalRandom random = ThreadLocalRandom.current();
-		if(!scorch.enabled() || burningBlock.heatRatio() < FireDefaults.SCORCH_HEAT_RATIO || random.nextDouble() >= FireDefaults.SCORCH_CHANCE_PER_SECOND * seconds * 9) {
+		if(!scorch.enabled() || burningBlock.heatRatio() < FireDefaults.SCORCH_HEAT_RATIO) {
 			return;
 		}
 
-		final Block ground = FireBlocks.blockAt(block.getWorld(), block.getX() + random.nextInt(-1, 2), block.getY() - random.nextInt(0, 2), block.getZ() + random.nextInt(-1, 2));
-		if(ground == null || !scorch.convertible().contains(ground.getType())) {
-			return;
+		final int area = (2 * FireDefaults.SCORCH_RADIUS + 1) * (2 * FireDefaults.SCORCH_RADIUS + 1);
+		final int attempts = (int) Math.floor(scorch.chancePerSecond() * seconds * area + random.nextDouble());
+		for(int i = 0; i < attempts; i++) {
+			final Block ground = FireBlocks.blockAt(block.getWorld(),
+					block.getX() + random.nextInt(-FireDefaults.SCORCH_RADIUS, FireDefaults.SCORCH_RADIUS + 1),
+					block.getY() - random.nextInt(0, FireDefaults.SCORCH_DEPTH + 1),
+					block.getZ() + random.nextInt(-FireDefaults.SCORCH_RADIUS, FireDefaults.SCORCH_RADIUS + 1));
+			if(ground != null && scorch.convertible().contains(ground.getType())) {
+				ground.setType(ground.getType() == Material.DIRT ? Material.COARSE_DIRT : scorch.materials().pick());
+			}
 		}
-
-		ground.setType(ground.getType() == Material.DIRT ? Material.COARSE_DIRT : scorch.materials().pick());
 	}
 
 	public void primeTnt(Block block) {

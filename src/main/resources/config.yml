@@ -98,6 +98,7 @@ realisticFire:
     heatAura: 1.0
     weakBlocks: 1.0
     ash: 1.0
+    scorch: 1.0
   ash:
     materials:
       GRAY_CONCRETE_POWDER: 70

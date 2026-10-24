@@ -26,6 +26,7 @@ class FireSettingsTest {
 		config.set("realisticFire.factors.flashover", 2);
 		config.set("realisticFire.factors.water", 0.5);
 		config.set("realisticFire.factors.heatAura", 2);
+		config.set("realisticFire.factors.scorch", 3);
 
 		final FireSettings settings = FireSettings.load(config);
 
@@ -34,6 +35,7 @@ class FireSettingsTest {
 		assertEquals(FireDefaults.FLASHOVER_HEAT / 2, settings.confinement().flashoverHeat());
 		assertEquals(FireDefaults.HOSE_COOLING / 2, settings.water().hoseCooling());
 		assertEquals(FireDefaults.AURA_IGNITE_THRESHOLD / 2, settings.heatAura().igniteThreshold());
+		assertEquals(FireDefaults.SCORCH_CHANCE_PER_SECOND * 3, settings.scorch().chancePerSecond(), 1e-9);
 	}
 
 	@Test
