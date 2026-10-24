@@ -24,7 +24,7 @@ public final class PluginSettings {
 	}
 
 	private final Plugin plugin;
-	private volatile Values values;
+	private Values values;
 
 	public PluginSettings(Plugin plugin) {
 		this.plugin = plugin;
