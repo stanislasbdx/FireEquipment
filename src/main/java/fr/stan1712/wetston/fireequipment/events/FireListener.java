@@ -174,7 +174,7 @@ public class FireListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBreach(BlockBreakEvent event) {
 		final Block block = event.getBlock();
-		if(!fire.isWorldEnabled(block.getWorld())) {
+		if(!fire.isWorldEnabled(block.getWorld()) || FireEnvironment.isTraversable(block)) {
 			return;
 		}
 
