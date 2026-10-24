@@ -18,7 +18,7 @@ public class WeakBlockBurster {
 
 	public void scanAround(Block center) {
 		final FireSettings.WeakBlocks weakBlocks = fire.getSettings().weakBlocks();
-		final boolean bursts = weakBlocks.enabled() && !weakBlocks.materials().isEmpty();
+		final boolean bursts = fire.getSettings().features().structure() && !weakBlocks.materials().isEmpty();
 		final boolean tnt = fire.getSettings().features().tnt();
 		if(!bursts && !tnt) {
 			return;
@@ -57,7 +57,7 @@ public class WeakBlockBurster {
 
 	public boolean isShatterable(Block block) {
 		final FireSettings.WeakBlocks weakBlocks = fire.getSettings().weakBlocks();
-		return weakBlocks.enabled() && weakBlocks.materials().contains(block.getType()) && block.getType().name().contains("GLASS");
+		return fire.getSettings().features().structure() && weakBlocks.materials().contains(block.getType()) && block.getType().name().contains("GLASS");
 	}
 
 	public void burst(Block block, int radius) {

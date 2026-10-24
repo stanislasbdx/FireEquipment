@@ -15,8 +15,8 @@ class FireSettingsTest {
 		assertEquals(FireDefaults.FLASHOVER_HEAT, settings.confinement().flashoverHeat());
 		assertEquals(FireDefaults.HOSE_COOLING, settings.water().hoseCooling());
 		assertEquals(FireDefaults.ASH_CHANCE, settings.ash().chance());
-		assertTrue(settings.confinement().flashover());
-		assertTrue(settings.collapse().enabled());
+		assertTrue(settings.features().flashover());
+		assertTrue(settings.features().structure());
 		assertTrue(settings.features().tnt());
 	}
 
@@ -52,12 +52,11 @@ class FireSettingsTest {
 
 		final FireSettings settings = FireSettings.load(config);
 
-		assertFalse(settings.confinement().flashover());
-		assertFalse(settings.collapse().enabled());
-		assertFalse(settings.weakBlocks().enabled());
+		assertFalse(settings.features().flashover());
+		assertFalse(settings.features().structure());
 		assertFalse(settings.scorch().enabled());
 		assertEquals(0, settings.ash().chance());
-		assertFalse(settings.heatAura().enabled());
+		assertFalse(settings.features().heatAura());
 	}
 
 	@Test

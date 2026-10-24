@@ -18,7 +18,7 @@ public class HeatAura {
 
 	public void tick() {
 		final FireSettings.HeatAura aura = fire.getSettings().heatAura();
-		if(!aura.enabled() || fire.all().isEmpty()) {
+		if(!fire.getSettings().features().heatAura() || fire.all().isEmpty()) {
 			return;
 		}
 

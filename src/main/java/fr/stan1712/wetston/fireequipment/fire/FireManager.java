@@ -544,7 +544,7 @@ public class FireManager {
 					return;
 				}
 			}
-			if(confinement.flashover() && environment.confined() && burningBlock.heatRatio() >= 0.8 && ThreadLocalRandom.current().nextInt(10) == 0) {
+			if(settings.features().flashover() && environment.confined() && burningBlock.heatRatio() >= 0.8 && ThreadLocalRandom.current().nextInt(10) == 0) {
 				flashover(block);
 			}
 			ensureFlames(block);

@@ -27,10 +27,8 @@ public record FireSettings(
 		HeatAura heatAura,
 		WeakBlocks weakBlocks,
 		Ash ash,
-		Collapse collapse,
 		Scorch scorch,
 		Features features,
-		Factors factors,
 		Map<Material, FireCategory> categories
 ) {
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Fire");
@@ -46,13 +44,13 @@ public record FireSettings(
 
 	public record OpenAir(double burnSpeed, double heatDissipation, double rainCooling) {}
 
-	public record Confinement(int maxRoomVolume, double burnSpeed, double heatMultiplier, double dissipation, boolean flashover, int flashoverRadius, double flashoverHeat, int flashoverCooldown, double flashoverIgniteChance, double flashoverHeatRatio) {}
+	public record Confinement(int maxRoomVolume, double burnSpeed, double heatMultiplier, double dissipation, int flashoverRadius, double flashoverHeat, int flashoverCooldown, double flashoverIgniteChance, double flashoverHeatRatio) {}
 
 	public record Water(double hoseCooling, double powderKnockdown, double powderCooling, double adjacentWaterCooling) {}
 
-	public record HeatAura(boolean enabled, int radius, double warnThreshold, double igniteThreshold, double fireTicksPerHeat, int maxFireTicks) {}
+	public record HeatAura(int radius, double warnThreshold, double igniteThreshold, double fireTicksPerHeat, int maxFireTicks) {}
 
-	public record WeakBlocks(boolean enabled, int radius, double burstHeat, double burstChance, Set<Material> materials) {}
+	public record WeakBlocks(int radius, double burstHeat, double burstChance, Set<Material> materials) {}
 
 	public record Ash(double chance, WeightedMaterials materials, boolean particles, double particleDensity, int particleDuration, int maxParticlesPerCycle) {
 		public Material pick() {
@@ -65,8 +63,6 @@ public record FireSettings(
 	}
 
 	public record Scorch(boolean enabled, double chancePerSecond, Set<Material> convertible, WeightedMaterials materials) {}
-
-	public record Collapse(boolean enabled, boolean effects) {}
 
 	public boolean isWorldEnabled(World world) {
 		return enabled && worlds.contains(world.getName());
@@ -123,7 +119,6 @@ public record FireSettings(
 						FireDefaults.CONFINED_BURN_SPEED,
 						FireDefaults.CONFINED_HEAT_MULTIPLIER,
 						FireDefaults.CONFINED_DISSIPATION * factors.cooling(),
-						features.flashover(),
 						FireDefaults.FLASHOVER_RADIUS,
 						FireDefaults.FLASHOVER_HEAT,
 						seconds(FireDefaults.FLASHOVER_COOLDOWN_SECONDS),
@@ -137,7 +132,6 @@ public record FireSettings(
 						FireDefaults.ADJACENT_WATER_COOLING * factors.extinguish()
 				),
 				new HeatAura(
-						features.heatAura(),
 						FireDefaults.AURA_RADIUS,
 						FireDefaults.AURA_WARN_THRESHOLD,
 						FireDefaults.AURA_IGNITE_THRESHOLD,
@@ -145,7 +139,6 @@ public record FireSettings(
 						FireDefaults.AURA_MAX_FIRE_TICKS
 				),
 				new WeakBlocks(
-						features.structure(),
 						FireDefaults.WEAK_RADIUS,
 						FireDefaults.WEAK_BURST_HEAT,
 						FireDefaults.WEAK_BURST_CHANCE,
@@ -159,7 +152,6 @@ public record FireSettings(
 						seconds(FireDefaults.ASH_PARTICLE_SECONDS),
 						(int) Math.round(FireDefaults.MAX_PARTICLES_PER_CYCLE * Math.max(1, factors.effects()))
 				),
-				new Collapse(features.structure(), features.structure()),
 				new Scorch(
 						features.scorch() && factors.effects() > 0,
 						FireDefaults.SCORCH_CHANCE_PER_SECOND * factors.effects(),
@@ -167,7 +159,6 @@ public record FireSettings(
 						WeightedMaterials.of(FireDefaults.SCORCH_MATERIALS, Material.COARSE_DIRT)
 				),
 				features,
-				factors,
 				loadCategories(config, factors)
 		);
 	}

@@ -43,8 +43,7 @@ public class CollapseManager {
 	}
 
 	public void collapseAround(Block removed) {
-		final FireSettings.Collapse collapse = fire.getSettings().collapse();
-		if(!collapse.enabled()) {
+		if(!fire.getSettings().features().structure()) {
 			return;
 		}
 
@@ -57,8 +56,8 @@ public class CollapseManager {
 			}
 
 			final List<Block> piece = new ArrayList<>();
-			if(!isAnchored(neighbor, piece, checked, collapse)) {
-				drop(piece, collapse);
+			if(!isAnchored(neighbor, piece, checked)) {
+				drop(piece);
 				collapsed = true;
 			}
 		}
@@ -87,7 +86,7 @@ public class CollapseManager {
 		Bukkit.getScheduler().runTask(plugin, () -> fire.restore(block, remainingTicks, heat, smouldering));
 	}
 
-	private boolean isAnchored(Block start, List<Block> piece, Set<Long> checked, FireSettings.Collapse collapse) {
+	private boolean isAnchored(Block start, List<Block> piece, Set<Long> checked) {
 		final ArrayDeque<Block> queue = new ArrayDeque<>();
 		final Set<Long> visited = new HashSet<>();
 		final World world = start.getWorld();
@@ -138,10 +137,10 @@ public class CollapseManager {
 		return type.isSolid() && type != Material.FIRE;
 	}
 
-	private void drop(List<Block> piece, FireSettings.Collapse collapse) {
+	private void drop(List<Block> piece) {
 		piece.sort(Comparator.comparingInt(Block::getY));
 
-		if(collapse.effects() && piece.size() >= FireDefaults.COLLAPSE_EFFECT_THRESHOLD) {
+		if(piece.size() >= FireDefaults.COLLAPSE_EFFECT_THRESHOLD) {
 			effects(piece);
 		}
 
