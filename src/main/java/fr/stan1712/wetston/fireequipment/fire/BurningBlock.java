@@ -42,10 +42,6 @@ public class BurningBlock {
 		this.heat = heat;
 	}
 
-	public FireState getState() {
-		return state;
-	}
-
 	public void setState(FireState state) {
 		this.state = state;
 	}

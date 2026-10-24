@@ -13,14 +13,6 @@ repositories {
         name = 'spigotmc-repo'
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
-    maven {
-        name = 'sonatype'
-        url = 'https://oss.sonatype.org/content/groups/public/'
-    }
-    maven {
-        url 'https://jitpack.io'
-    }
-    mavenLocal()
 }
 
 sonar {
@@ -104,8 +96,3 @@ tasks.named('build') {
     dependsOn tasks.named('shadowJar'), tasks.named('resourcePackZip')
 }
 
-tasks.register('copyJar', Copy) {
-    from "build/libs/" + rootProject.name + "-" + version + ".jar"
-    into 'J:/@MINECRAFT/SERV LOCAL DEV/plugins'
-}
-//project.tasks["jar"].finalizedBy("copyJar")

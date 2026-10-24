@@ -1,6 +1,5 @@
 Version: 0
 Prefix: FireEquipment
-ShortPrefix: "&6[&eFireEquip&6]"
 
 Core:
   NoPerms: "You don't have the permission !"
