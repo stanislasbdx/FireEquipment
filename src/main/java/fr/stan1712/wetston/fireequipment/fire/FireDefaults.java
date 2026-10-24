@@ -1,6 +1,26 @@
 package fr.stan1712.wetston.fireequipment.fire;
 
+import org.bukkit.Material;
+
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+
 public final class FireDefaults {
+	public static final Map<Material, Material> CRACKS = crackTable();
+
+	private static Map<Material, Material> crackTable() {
+		final Map<Material, Material> cracks = new EnumMap<>(Material.class);
+		cracks.put(Material.STONE_BRICKS, Material.CRACKED_STONE_BRICKS);
+		cracks.put(Material.DEEPSLATE_BRICKS, Material.CRACKED_DEEPSLATE_BRICKS);
+		cracks.put(Material.DEEPSLATE_TILES, Material.CRACKED_DEEPSLATE_TILES);
+		cracks.put(Material.NETHER_BRICKS, Material.CRACKED_NETHER_BRICKS);
+		cracks.put(Material.POLISHED_BLACKSTONE_BRICKS, Material.CRACKED_POLISHED_BLACKSTONE_BRICKS);
+		cracks.put(Material.STONE, Material.COBBLESTONE);
+		cracks.put(Material.DEEPSLATE, Material.COBBLED_DEEPSLATE);
+		return Collections.unmodifiableMap(cracks);
+	}
+
 	private FireDefaults() {
 		throw new IllegalStateException("Utility class");
 	}
@@ -76,6 +96,11 @@ public final class FireDefaults {
 	public static final double SCORCH_CHANCE_PER_SECOND = 0.2;
 	public static final int SCORCH_RADIUS = 2;
 	public static final int SCORCH_DEPTH = 2;
+
+	public static final double CRACK_HEAT_RATIO = 0.8;
+	public static final double CRACK_CHANCE_PER_SECOND = 0.05;
+	public static final double CRACK_ENGULF_CHANCE = 0.5;
+	public static final double CRACK_COLLAPSE_CHANCE = 0.3;
 
 	public static final int TNT_FUSE_TICKS = 80;
 	public static final double TNT_PRIME_HEAT = 30;

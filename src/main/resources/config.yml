@@ -88,6 +88,7 @@ realisticFire:
     particles: true
     smoke: true
     scorch: true
+    crack: true
     tnt: true
   factors:
     burnTime: 1.0

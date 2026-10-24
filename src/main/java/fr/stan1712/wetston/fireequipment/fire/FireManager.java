@@ -513,6 +513,13 @@ public class FireManager {
 
 			spread(burningBlock, block, seconds, burningNeighbors, oxygen);
 			scorch(burningBlock, block, seconds);
+			if(burningBlock.heatRatio() >= FireDefaults.CRACK_HEAT_RATIO && ThreadLocalRandom.current().nextDouble() < FireDefaults.CRACK_CHANCE_PER_SECOND * seconds * 6) {
+				final BlockFace face = FireBlocks.FACES[ThreadLocalRandom.current().nextInt(FireBlocks.FACES.length)];
+				final Block neighbor = FireBlocks.neighbor(block, face);
+				if(neighbor != null) {
+					crack(neighbor);
+				}
+			}
 			if(burningBlock.heatRatio() >= 0.5 && ThreadLocalRandom.current().nextInt(20) == 0) {
 				burster.scanAround(block);
 				if(!burning.containsKey(key)) {
@@ -684,6 +691,9 @@ public class FireManager {
 						}
 						continue;
 					}
+					if(random.nextDouble() < FireDefaults.CRACK_ENGULF_CHANCE && crack(target)) {
+						continue;
+					}
 
 					final FireCategory category = settings.categoryOf(target.getType());
 					if(category != null && hasAirFace(target) && random.nextDouble() < confinement.flashoverIgniteChance()) {
@@ -692,6 +702,19 @@ public class FireManager {
 				}
 			}
 		}
+	}
+
+	public boolean crack(Block block) {
+		final Material cracked = crackedVariant(block.getType());
+		if(cracked == null) {
+			return false;
+		}
+		block.setType(cracked);
+		return true;
+	}
+
+	public Material crackedVariant(Material material) {
+		return settings.features().crack() ? FireDefaults.CRACKS.get(material) : null;
 	}
 
 	public void placeEphemeralFlame(Block cell) {
