@@ -39,6 +39,10 @@ class GiveSubCommand implements SubCommand {
 			messages.send(sender, "[" + settings.prefix() + "] This command can only be used by a player.");
 			return;
 		}
+		if(!player.hasPermission(type.permission())) {
+			messages.noPermission(player);
+			return;
+		}
 
 		player.getInventory().addItem(items.create(type)).values().forEach(left -> player.getWorld().dropItem(player.getLocation(), left));
 		messages.box(player, messages.get(type.giveMessagePath()));
