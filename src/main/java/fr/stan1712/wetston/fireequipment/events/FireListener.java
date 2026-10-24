@@ -3,6 +3,7 @@ package fr.stan1712.wetston.fireequipment.events;
 import fr.stan1712.wetston.fireequipment.fire.AshManager;
 import fr.stan1712.wetston.fireequipment.fire.BlockKey;
 import fr.stan1712.wetston.fireequipment.fire.BurningBlock;
+import fr.stan1712.wetston.fireequipment.fire.FireEnvironment;
 import fr.stan1712.wetston.fireequipment.fire.FireManager;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -165,6 +166,20 @@ public class FireListener implements Listener {
 
 		Bukkit.getScheduler().runTask(plugin, () -> {
 			if(block.getBlockData() instanceof Openable opened && opened.isOpen()) {
+				fire.getBackdraft().onOpened(block);
+			}
+		});
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onBreach(BlockBreakEvent event) {
+		final Block block = event.getBlock();
+		if(!fire.isWorldEnabled(block.getWorld())) {
+			return;
+		}
+
+		Bukkit.getScheduler().runTask(plugin, () -> {
+			if(FireEnvironment.isTraversable(block)) {
 				fire.getBackdraft().onOpened(block);
 			}
 		});

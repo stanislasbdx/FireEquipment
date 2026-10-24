@@ -63,7 +63,7 @@ public class FireEnvironment {
 		return new Environment(false, true, visited.size());
 	}
 
-	public static Environment room(Block start, Set<Long> blocked, int maxRoomVolume) {
+	public static Environment room(Block start, Set<Long> blocked, int maxRoomVolume, Set<Long> cells) {
 		final ArrayDeque<Block> queue = new ArrayDeque<>();
 		final Set<Long> visited = new HashSet<>(blocked);
 
@@ -74,6 +74,7 @@ public class FireEnvironment {
 		while(!queue.isEmpty()) {
 			final Block current = queue.poll();
 			volume++;
+			cells.add(BlockKey.of(current).pack());
 			if(isExposed(current)) {
 				return new Environment(false, false, volume);
 			}

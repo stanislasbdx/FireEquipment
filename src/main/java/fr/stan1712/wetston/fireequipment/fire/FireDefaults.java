@@ -64,8 +64,10 @@ public final class FireDefaults {
 	public static final float FLASHOVER_VOLUME = 6;
 	public static final double EPHEMERAL_FLAME_CHANCE = 0.25;
 	public static final int BACKDRAFT_RADIUS = 4;
-	public static final double BACKDRAFT_HEAT_SHARE = 0.5;
-	public static final double BACKDRAFT_VENTILATED_HEAT_SHARE = 1;
+	public static final double BACKDRAFT_CONFINED_CELSIUS = 250;
+	public static final double BACKDRAFT_VENTILATED_CELSIUS = 450;
+	public static final int BACKDRAFT_SAMPLE_DEPTH = 2;
+	public static final long BACKDRAFT_COOLDOWN_TICKS = 200;
 	public static final long BACKDRAFT_DELAY_TICKS = 20;
 	public static final int BACKDRAFT_REACH = 6;
 	public static final int BACKDRAFT_FIRE_TICKS = 100;

@@ -12,21 +12,30 @@ import org.bukkit.block.data.Bisected;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Backdraft {
+	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Fire");
+
 	private final Plugin plugin;
 	private final FireManager fire;
+	private final Map<BlockKey, Long> cooldowns = new HashMap<>();
 
 	public Backdraft(Plugin plugin, FireManager fire) {
 		this.plugin = plugin;
 		this.fire = fire;
 	}
 
-	public record Pressure(Block room, double ratio, boolean confined) {
-		public static final Pressure NONE = new Pressure(null, 0, false);
+	public record Pressure(Block room, double ratio, boolean confined, double celsius) {
+		public static final Pressure NONE = new Pressure(null, 0, false, FireDefaults.AMBIENT_CELSIUS);
 	}
 
 	public void onOpened(Block opening) {
@@ -37,13 +46,22 @@ public class Backdraft {
 
 		fire.invalidateEnvironment(BlockKey.of(opening), FireDefaults.BACKDRAFT_RADIUS * 2);
 
-		final Pressure pressure = assess(opening);
-		if(pressure.room() == null || pressure.ratio() < 1 || fire.isZoneCoolingDown(pressure.room())) {
+		final BlockKey key = BlockKey.of(opening);
+		final Long last = cooldowns.get(key);
+		if(last != null && fire.getTick() - last < FireDefaults.BACKDRAFT_COOLDOWN_TICKS) {
 			return;
 		}
 
+		final Pressure pressure = assess(opening);
+		_log.debug("[backdraft] Opening at {} {} {} : {} °C, ratio {}, confined {}", opening.getX(), opening.getY(), opening.getZ(), Math.round(pressure.celsius()), pressure.ratio(), pressure.confined());
+		if(pressure.room() == null || pressure.ratio() < 1) {
+			return;
+		}
+
+		cooldowns.values().removeIf(at -> fire.getTick() - at >= FireDefaults.BACKDRAFT_COOLDOWN_TICKS);
+		cooldowns.put(key, fire.getTick());
+
 		final Block room = pressure.room();
-		fire.claimZone(room);
 		final Location center = opening.getLocation().add(0.5, 0.5, 0.5);
 		final Vector outward = center.toVector().subtract(room.getLocation().add(0.5, 0.5, 0.5).toVector()).normalize();
 		inhale(center, outward, pressure.confined() ? 0.5 : 0.25);
@@ -66,27 +84,54 @@ public class Backdraft {
 			}
 		}
 
-		Pressure worst = Pressure.NONE;
+		final List<Block> sides = new ArrayList<>();
 		for(BlockFace face : FireBlocks.FACES) {
 			final Block cell = FireBlocks.neighbor(opening, face);
-			if(cell == null || !FireEnvironment.isTraversable(cell)) {
-				continue;
+			if(cell != null && FireEnvironment.isTraversable(cell)) {
+				sides.add(cell);
 			}
+		}
 
-			final double heat = fire.heatAround(cell.getWorld().getUID(), cell.getX() + 0.5, cell.getY() + 0.5, cell.getZ() + 0.5, FireDefaults.BACKDRAFT_RADIUS, false);
+		final double factor = Math.max(0.01, settings.factors().flashover());
+		Pressure worst = Pressure.NONE;
+
+		for(Block cell : sides) {
+			final double heat = sideHeat(opening, cell);
 			if(heat <= 0) {
 				continue;
 			}
 
-			final FireEnvironment.Environment environment = FireEnvironment.room(cell, blocked, settings.confinement().maxRoomVolume());
-			final double share = environment.confined() ? FireDefaults.BACKDRAFT_HEAT_SHARE : FireDefaults.BACKDRAFT_VENTILATED_HEAT_SHARE;
-			final double ratio = heat / (settings.confinement().flashoverHeat() * share);
+			final Set<Long> roomCells = new HashSet<>();
+			final FireEnvironment.Environment environment = FireEnvironment.room(cell, blocked, settings.confinement().maxRoomVolume(), roomCells);
+			final boolean reachesElsewhere = sides.stream().anyMatch(other -> other != cell && !roomCells.contains(BlockKey.of(other).pack()));
+			if(!reachesElsewhere) {
+				continue;
+			}
+
+			final double thresholdCelsius = environment.confined() ? FireDefaults.BACKDRAFT_CONFINED_CELSIUS : FireDefaults.BACKDRAFT_VENTILATED_CELSIUS;
+			final double thresholdHeat = (thresholdCelsius - FireDefaults.AMBIENT_CELSIUS) / FireDefaults.CELSIUS_PER_HEAT / factor;
+			final double ratio = heat / thresholdHeat;
 			if(ratio > worst.ratio()) {
-				worst = new Pressure(cell, ratio, environment.confined());
+				worst = new Pressure(cell, ratio, environment.confined(), FireDefaults.celsius(heat));
 			}
 		}
 
 		return worst;
+	}
+
+	private double sideHeat(Block opening, Block cell) {
+		final int dx = cell.getX() - opening.getX();
+		final int dy = cell.getY() - opening.getY();
+		final int dz = cell.getZ() - opening.getZ();
+		final double radius = fire.getSettings().heatAura().radius();
+		double hottest = 0;
+
+		for(int step = 0; step <= FireDefaults.BACKDRAFT_SAMPLE_DEPTH; step++) {
+			hottest = Math.max(hottest, fire.heatAround(cell.getWorld().getUID(),
+					cell.getX() + 0.5 + dx * step, cell.getY() + 0.5 + dy * step, cell.getZ() + 0.5 + dz * step, radius, true));
+		}
+
+		return hottest;
 	}
 
 	private void inhale(Location center, Vector outward, double pull) {

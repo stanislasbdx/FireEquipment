@@ -30,6 +30,7 @@ public record FireSettings(
 		Collapse collapse,
 		Scorch scorch,
 		Features features,
+		Factors factors,
 		Map<Material, FireCategory> categories
 ) {
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Fire");
@@ -176,6 +177,7 @@ public record FireSettings(
 						WeightedMaterials.read(config.getConfigurationSection(ROOT + "scorch.materials"), Material.COARSE_DIRT)
 				),
 				features,
+				factors,
 				loadCategories(config, factors)
 		);
 	}

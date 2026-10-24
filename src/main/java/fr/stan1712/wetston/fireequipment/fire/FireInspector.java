@@ -177,8 +177,9 @@ public class FireInspector {
 			level = "&a" + text("Pressure.Low");
 		}
 
-		final double heat = fire.heatAround(block.getWorld().getUID(), block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5, fire.getSettings().heatAura().radius(), true);
-		final double celsius = FireDefaults.celsius(heat);
+		final double celsius = pressure.room() == null
+				? FireDefaults.celsius(fire.heatAround(block.getWorld().getUID(), block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5, fire.getSettings().heatAura().radius(), true))
+				: pressure.celsius();
 		return "&f" + text("Pressure.Opening") + " &8· &7" + text("Pressure.Label") + " : " + level + " &8· " + color(celsius) + Math.round(celsius) + " °C";
 	}
 
