@@ -14,6 +14,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.Fire;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.slf4j.Logger;
@@ -53,6 +54,7 @@ public class FireManager {
 	private long tick;
 	private BukkitTask task;
 	private int particleBudget;
+	private boolean dispatching;
 
 	public FireManager(Plugin plugin) {
 		this.plugin = plugin;
@@ -377,7 +379,23 @@ public class FireManager {
 		}
 
 		final double heat = heatAround(block.getWorld().getUID(), block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5, FireDefaults.AUTOIGNITION_RADIUS, true);
-		return heat >= FireDefaults.AUTOIGNITION_HEAT && ignite(block);
+		return heat >= FireDefaults.AUTOIGNITION_HEAT && canBurn(block, null) && ignite(block);
+	}
+
+	public boolean isDispatching() {
+		return dispatching;
+	}
+
+	public boolean canBurn(Block block, Block source) {
+		final BlockBurnEvent event = new BlockBurnEvent(block, source);
+		dispatching = true;
+		try {
+			Bukkit.getPluginManager().callEvent(event);
+		}
+		finally {
+			dispatching = false;
+		}
+		return !event.isCancelled();
 	}
 
 	public List<BurningBlock> burningWithin(UUID world, double x, double y, double z, double radius) {
@@ -517,7 +535,7 @@ public class FireManager {
 				final BlockFace face = FireBlocks.FACES[ThreadLocalRandom.current().nextInt(FireBlocks.FACES.length)];
 				final Block neighbor = FireBlocks.neighbor(block, face);
 				if(neighbor != null) {
-					crack(neighbor, FireDefaults.CRACK_CHANCE_PER_SECOND * seconds * FireBlocks.FACES.length);
+					crack(neighbor, FireDefaults.CRACK_CHANCE_PER_SECOND * seconds * FireBlocks.FACES.length, block);
 				}
 			}
 			if(burningBlock.heatRatio() >= 0.5 && ThreadLocalRandom.current().nextInt(20) == 0) {
@@ -590,7 +608,7 @@ public class FireManager {
 
 					final double vertical = dy > 0 ? spread.upwardBonus() : dy < 0 ? 0.5 : 1;
 					if(target.getType() == Material.TNT) {
-						if(random.nextDouble() < base * vertical / distanceSquared) {
+						if(random.nextDouble() < base * vertical / distanceSquared && canBurn(target, block)) {
 							primeTnt(target);
 						}
 						continue;
@@ -601,7 +619,7 @@ public class FireManager {
 						continue;
 					}
 
-					if(random.nextDouble() < base * category.ignitionChance() * vertical / distanceSquared && hasAirFace(target)) {
+					if(random.nextDouble() < base * category.ignitionChance() * vertical / distanceSquared && hasAirFace(target) && canBurn(target, block)) {
 						ignite(target);
 					}
 				}
@@ -623,7 +641,7 @@ public class FireManager {
 					block.getX() + random.nextInt(-FireDefaults.SCORCH_RADIUS, FireDefaults.SCORCH_RADIUS + 1),
 					block.getY() - random.nextInt(0, FireDefaults.SCORCH_DEPTH + 1),
 					block.getZ() + random.nextInt(-FireDefaults.SCORCH_RADIUS, FireDefaults.SCORCH_RADIUS + 1));
-			if(ground != null && scorch.convertible().contains(ground.getType())) {
+			if(ground != null && scorch.convertible().contains(ground.getType()) && canBurn(ground, block)) {
 				ground.setType(ground.getType() == Material.DIRT ? Material.COARSE_DIRT : scorch.materials().pick());
 			}
 		}
@@ -681,6 +699,9 @@ public class FireManager {
 					if(target == null) {
 						continue;
 					}
+					if(!target.getType().isAir() && !canBurn(target, center)) {
+						continue;
+					}
 					if(target.getType() == Material.TNT) {
 						primeTnt(target);
 						continue;
@@ -691,7 +712,7 @@ public class FireManager {
 						}
 						continue;
 					}
-					if(crack(target, FireDefaults.CRACK_ENGULF_CHANCE)) {
+					if(crack(target, FireDefaults.CRACK_ENGULF_CHANCE, center)) {
 						continue;
 					}
 
@@ -704,9 +725,9 @@ public class FireManager {
 		}
 	}
 
-	public boolean crack(Block block, double chance) {
+	public boolean crack(Block block, double chance, Block source) {
 		final Material cracked = rollCrack(block.getType(), chance);
-		if(cracked == null) {
+		if(cracked == null || !canBurn(block, source)) {
 			return false;
 		}
 		block.setType(cracked);
@@ -824,6 +845,10 @@ public class FireManager {
 	}
 
 	private void burnOut(BurningBlock burningBlock, Block block) {
+		if(!canBurn(block, null)) {
+			extinguish(burningBlock);
+			return;
+		}
 		unregister(burningBlock.getKey());
 		removeFlames(block);
 		block.setType(Material.AIR);

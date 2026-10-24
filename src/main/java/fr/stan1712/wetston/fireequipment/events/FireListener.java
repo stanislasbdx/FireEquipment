@@ -66,7 +66,7 @@ public class FireListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void onBurn(BlockBurnEvent event) {
-		if(fire.isWorldEnabled(event.getBlock().getWorld())) {
+		if(!fire.isDispatching() && fire.isWorldEnabled(event.getBlock().getWorld())) {
 			event.setCancelled(true);
 		}
 	}

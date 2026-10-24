@@ -67,7 +67,7 @@ public class CollapseManager {
 			for(BlockFace face : FireBlocks.FACES) {
 				final Block neighbor = FireBlocks.neighbor(removed, face);
 				if(neighbor != null) {
-					fire.crack(neighbor, FireDefaults.CRACK_COLLAPSE_CHANCE);
+					fire.crack(neighbor, FireDefaults.CRACK_COLLAPSE_CHANCE, removed);
 				}
 			}
 		}

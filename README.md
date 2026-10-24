@@ -12,6 +12,7 @@ Roleplay tools for firefighter gameplay on Spigot, Paper and Purpur (Minecraft 1
 
 Tools are recognised by a persistent data tag, so renaming an item or changing its texture does not affect them.
 Block changes go through `BlockPlaceEvent` / `BlockBreakEvent`, so region protection plugins are respected.
+The realistic fire asks protection plugins through `BlockBurnEvent` before it ignites, burns out, scorches or cracks a block.
 
 ## Commands
 
