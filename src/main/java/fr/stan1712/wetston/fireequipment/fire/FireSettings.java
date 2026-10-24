@@ -45,7 +45,7 @@ public record FireSettings(
 
 	public record OpenAir(double burnSpeed, double heatDissipation, double rainCooling) {}
 
-	public record Confinement(int maxRoomVolume, double burnSpeed, double heatMultiplier, boolean flashover, int flashoverRadius, double flashoverHeat, int flashoverCooldown, double flashoverIgniteChance, double flashoverHeatRatio) {}
+	public record Confinement(int maxRoomVolume, double burnSpeed, double heatMultiplier, double dissipation, boolean flashover, int flashoverRadius, double flashoverHeat, int flashoverCooldown, double flashoverIgniteChance, double flashoverHeatRatio) {}
 
 	public record Water(double hoseCooling, double powderKnockdown, double powderCooling, double adjacentWaterCooling) {}
 
@@ -129,6 +129,7 @@ public record FireSettings(
 						FireDefaults.MAX_ROOM_VOLUME,
 						FireDefaults.CONFINED_BURN_SPEED,
 						FireDefaults.CONFINED_HEAT_MULTIPLIER,
+						FireDefaults.CONFINED_DISSIPATION * factors.cooling(),
 						features.flashover() && factors.flashover() > 0,
 						Math.max(1, (int) Math.round(FireDefaults.FLASHOVER_RADIUS * Math.min(2, factors.flashover()))),
 						FireDefaults.FLASHOVER_HEAT / Math.max(0.01, factors.flashover()),

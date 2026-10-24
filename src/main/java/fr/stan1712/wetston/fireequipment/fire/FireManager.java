@@ -45,7 +45,7 @@ public class FireManager {
 	private final ArrayDeque<BlockKey> pending = new ArrayDeque<>();
 	private final Map<BlockKey, Long> flashovers = new HashMap<>();
 	private final List<Runnable> shutdownHooks = new ArrayList<>();
-	private final Map<ChunkRef, Map<BlockKey, Double>> hotSpots = new HashMap<>();
+	private final Map<ChunkRef, Map<BlockKey, HotSpot>> hotSpots = new HashMap<>();
 
 	private FireSettings settings;
 	private long tick;
@@ -348,14 +348,14 @@ public class FireManager {
 
 		for(int cx = ((int) Math.floor(x - radius)) >> 4; cx <= ((int) Math.floor(x + radius)) >> 4; cx++) {
 			for(int cz = ((int) Math.floor(z - radius)) >> 4; cz <= ((int) Math.floor(z + radius)) >> 4; cz++) {
-				final Map<BlockKey, Double> spots = hotSpots.get(new ChunkRef(world, cx, cz));
+				final Map<BlockKey, HotSpot> spots = hotSpots.get(new ChunkRef(world, cx, cz));
 				if(spots == null) {
 					continue;
 				}
-				for(Map.Entry<BlockKey, Double> spot : spots.entrySet()) {
+				for(Map.Entry<BlockKey, HotSpot> spot : spots.entrySet()) {
 					final double distanceSquared = spot.getKey().distanceSquared(x, y, z);
 					if(distanceSquared <= radiusSquared) {
-						total += FireDefaults.HOT_SPOT_HEAT_SHARE * (weighted ? spot.getValue() / Math.max(1, distanceSquared) : spot.getValue());
+						total += FireDefaults.HOT_SPOT_HEAT_SHARE * (weighted ? spot.getValue().heat / Math.max(1, distanceSquared) : spot.getValue().heat);
 					}
 				}
 			}
@@ -481,7 +481,7 @@ public class FireManager {
 		final FireSettings.Confinement confinement = settings.confinement();
 		final FireEnvironment.Environment environment = FireEnvironment.of(burningBlock, block, tick, confinement.maxRoomVolume());
 		final double oxygen = oxygen(environment, airFaces);
-		final double dissipation = environment.openAir() ? settings.openAir().heatDissipation() : heatSettings.dissipation();
+		final double dissipation = dissipation(environment);
 		final double rain = environment.openAir() && block.getWorld().hasStorm() ? settings.openAir().rainCooling() : 0;
 		final double cooling = waterFaces * settings.water().adjacentWaterCooling() + rain;
 		final double maxHeat = burningBlock.getCategory().maxHeat();
@@ -723,20 +723,38 @@ public class FireManager {
 		}
 
 		final FireEnvironment.Environment environment = burningBlock.getEnvironment();
-		if(environment != null && environment.confined() && burningBlock.getHeat() > 0) {
-			hotSpots.computeIfAbsent(burningBlock.getKey().chunk(), ref -> new HashMap<>()).merge(burningBlock.getKey(), burningBlock.getHeat(), Math::max);
+		if(burningBlock.getHeat() > 0) {
+			final HotSpot spot = new HotSpot(burningBlock.getHeat(), environment == null ? settings.heat().dissipation() : dissipation(environment));
+			hotSpots.computeIfAbsent(burningBlock.getKey().chunk(), ref -> new HashMap<>()).merge(burningBlock.getKey(), spot, (a, b) -> a.heat >= b.heat ? a : b);
+		}
+	}
+
+	private double dissipation(FireEnvironment.Environment environment) {
+		if(environment.openAir()) {
+			return settings.openAir().heatDissipation();
+		}
+		return environment.confined() ? settings.confinement().dissipation() : settings.heat().dissipation();
+	}
+
+	private static final class HotSpot {
+		private double heat;
+		private final double rate;
+
+		private HotSpot(double heat, double rate) {
+			this.heat = heat;
+			this.rate = rate;
 		}
 	}
 
 	private void coolHotSpots() {
-		final double cooling = settings.heat().dissipation() * settings.updateInterval() / 20.0;
+		final double seconds = settings.updateInterval() / 20.0;
 		final ThreadLocalRandom random = ThreadLocalRandom.current();
 		final List<Block> candidates = new ArrayList<>();
 
 		hotSpots.values().removeIf(spots -> {
 			spots.entrySet().removeIf(spot -> {
-				spot.setValue(spot.getValue() - cooling);
-				if(spot.getValue() <= 0) {
+				spot.getValue().heat -= spot.getValue().rate * seconds;
+				if(spot.getValue().heat <= 0) {
 					return true;
 				}
 

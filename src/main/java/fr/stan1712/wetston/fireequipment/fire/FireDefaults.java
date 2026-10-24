@@ -18,7 +18,7 @@ public final class FireDefaults {
 
 	public static final double HEAT_IGNITION = 45;
 	public static final double HEAT_GROWTH = 6;
-	public static final double HEAT_DISSIPATION = 1;
+	public static final double HEAT_DISSIPATION = 0.6;
 	public static final double EXTINGUISH_THRESHOLD = 15;
 	public static final double REIGNITE_THRESHOLD = 40;
 	public static final double REIGNITE_DELAY_SECONDS = 10;
@@ -29,12 +29,13 @@ public final class FireDefaults {
 	public static final double UPWARD_BONUS = 2;
 
 	public static final double OPEN_AIR_BURN_SPEED = 1.25;
-	public static final double OPEN_AIR_DISSIPATION = 3;
+	public static final double OPEN_AIR_DISSIPATION = 2;
 	public static final double RAIN_COOLING = 2;
 
 	public static final int MAX_ROOM_VOLUME = 150;
 	public static final double CONFINED_BURN_SPEED = 0.7;
 	public static final double CONFINED_HEAT_MULTIPLIER = 1.8;
+	public static final double CONFINED_DISSIPATION = 0.25;
 	public static final int FLASHOVER_RADIUS = 3;
 	public static final double FLASHOVER_HEAT = 600;
 	public static final double FLASHOVER_COOLDOWN_SECONDS = 30;
