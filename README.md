@@ -1,6 +1,6 @@
 # FireEquipment
 
-Roleplay tools for firefighter gameplay on Spigot, Paper and Purpur (Minecraft 1.21+).
+Roleplay tools for firefighter gameplay on Spigot, Paper and Purpur (Minecraft 1.21.4+).
 
 ## Tools
 
