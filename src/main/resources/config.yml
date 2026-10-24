@@ -46,7 +46,7 @@ Equipment:
   Hose:
     displayName: "Fire Hose"
     usage: "Right-click to throw water"
-    range: 5
+    range: 25
     cooldown: 10
     waterLifetime: 60
     itemModel: "fireequipment:hose"
