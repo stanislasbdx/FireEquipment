@@ -60,6 +60,7 @@ public class WeakBlockBurster {
 		final World world = block.getWorld();
 
 		block.setType(Material.AIR);
+		fire.getCollapse().collapseAround(block);
 		world.playSound(location, data.getSoundGroup().getBreakSound(), 1.2f, 0.8f);
 		world.spawnParticle(Particle.BLOCK, location, 30, 0.3, 0.3, 0.3, 0, data);
 		fire.invalidateEnvironment(key, radius + 2);

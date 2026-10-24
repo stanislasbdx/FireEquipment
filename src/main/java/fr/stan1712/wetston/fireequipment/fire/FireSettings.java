@@ -68,7 +68,7 @@ public record FireSettings(
 		}
 	}
 
-	public record Collapse(boolean enabled, int maxHeight, int minSideSupport, Set<Material> excluded) {}
+	public record Collapse(boolean enabled, boolean effects, Set<Material> anchors) {}
 
 	public boolean isWorldEnabled(World world) {
 		return enabled && worlds.contains(world.getName());
@@ -163,8 +163,7 @@ public record FireSettings(
 				loadAsh(config, features, factors),
 				new Collapse(
 						features.collapse(),
-						FireDefaults.COLLAPSE_MAX_HEIGHT,
-						FireDefaults.COLLAPSE_MIN_SIDE_SUPPORT,
+						features.collapseEffects(),
 						MaterialMatcher.resolve(config.getStringList(ROOT + "collapse.anchors"))
 				),
 				features,

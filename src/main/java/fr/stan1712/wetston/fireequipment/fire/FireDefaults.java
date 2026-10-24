@@ -53,6 +53,6 @@ public final class FireDefaults {
 	public static final double ASH_PARTICLE_SECONDS = 60;
 	public static final int MAX_PARTICLES_PER_CYCLE = 300;
 
-	public static final int COLLAPSE_MAX_HEIGHT = 12;
-	public static final int COLLAPSE_MIN_SIDE_SUPPORT = 2;
+	public static final int COLLAPSE_MAX_STRUCTURE = 128;
+	public static final int COLLAPSE_EFFECT_THRESHOLD = 6;
 }

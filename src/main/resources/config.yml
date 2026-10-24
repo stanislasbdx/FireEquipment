@@ -97,6 +97,11 @@ realisticFire:
       - "#trapdoors"
   collapse:
     anchors:
+      - "#dirt"
+      - "#base_stone_overworld"
+      - "#base_stone_nether"
+      - "NETHERRACK"
+      - "END_STONE"
       - "BEDROCK"
       - "BARRIER"
       - "REINFORCED_DEEPSLATE"

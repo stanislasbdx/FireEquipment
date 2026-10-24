@@ -4,16 +4,27 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.TileState;
+import org.bukkit.block.Container;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class CollapseManager {
 	private final Plugin plugin;
@@ -26,19 +37,23 @@ public class CollapseManager {
 		this.burningKey = new NamespacedKey(plugin, "burning");
 	}
 
-	public void collapseAbove(Block removed) {
+	public void collapseAround(Block removed) {
 		final FireSettings.Collapse collapse = fire.getSettings().collapse();
 		if(!collapse.enabled()) {
 			return;
 		}
 
-		final World world = removed.getWorld();
-		for(int i = 1; i <= collapse.maxHeight(); i++) {
-			final Block above = FireBlocks.blockAt(world, removed.getX(), removed.getY() + i, removed.getZ());
-			if(above == null || !canFall(above, collapse) || isSupported(above, collapse)) {
-				return;
+		final Set<Long> checked = new HashSet<>();
+		for(BlockFace face : FireBlocks.FACES) {
+			final Block neighbor = FireBlocks.neighbor(removed, face);
+			if(neighbor == null || !isStructural(neighbor) || checked.contains(BlockKey.of(neighbor).pack())) {
+				continue;
 			}
-			drop(above);
+
+			final List<Block> piece = new ArrayList<>();
+			if(!isAnchored(neighbor, piece, checked, collapse)) {
+				drop(piece, collapse);
+			}
 		}
 	}
 
@@ -56,37 +71,72 @@ public class CollapseManager {
 		Bukkit.getScheduler().runTask(plugin, () -> fire.restore(block, remainingTicks, heat, smouldering));
 	}
 
-	private boolean canFall(Block block, FireSettings.Collapse collapse) {
-		final Material type = block.getType();
-		final BlockData data = block.getBlockData();
+	private boolean isAnchored(Block start, List<Block> piece, Set<Long> checked, FireSettings.Collapse collapse) {
+		final ArrayDeque<Block> queue = new ArrayDeque<>();
+		final Set<Long> visited = new HashSet<>();
+		final World world = start.getWorld();
 
-		return type.isSolid()
-				&& !type.hasGravity()
-				&& !collapse.excluded().contains(type)
-				&& !(data instanceof Bisected)
-				&& !(data instanceof Bed)
-				&& !(block.getState() instanceof TileState);
-	}
+		queue.add(start);
+		visited.add(BlockKey.of(start).pack());
 
-	private boolean isSupported(Block block, FireSettings.Collapse collapse) {
-		final Block below = FireBlocks.neighbor(block, BlockFace.DOWN);
-		if(below == null || below.getType().isSolid()) {
-			return true;
-		}
+		try {
+			while(!queue.isEmpty()) {
+				final Block current = queue.poll();
+				piece.add(current);
 
-		int sideSupport = 0;
-		for(BlockFace face : FireBlocks.HORIZONTAL_FACES) {
-			final Block side = FireBlocks.neighbor(block, face);
-			if(side == null || (side.getType().isSolid() && !fire.isBurningAt(BlockKey.of(side)))) {
-				sideSupport++;
+				if(piece.size() > FireDefaults.COLLAPSE_MAX_STRUCTURE || collapse.anchors().contains(current.getType()) || current.getY() <= world.getMinHeight()) {
+					return true;
+				}
+
+				for(BlockFace face : FireBlocks.FACES) {
+					final Block next = FireBlocks.neighbor(current, face);
+					if(next == null) {
+						return true;
+					}
+					if(isStructural(next) && visited.add(BlockKey.of(next).pack())) {
+						queue.add(next);
+					}
+				}
 			}
+			return false;
 		}
-
-		return sideSupport >= collapse.minSideSupport();
+		finally {
+			checked.addAll(visited);
+		}
 	}
 
-	private void drop(Block block) {
-		final BlockData data = block.getBlockData();
+	private static boolean isStructural(Block block) {
+		final Material type = block.getType();
+		return type.isSolid() && type != Material.FIRE;
+	}
+
+	private void drop(List<Block> piece, FireSettings.Collapse collapse) {
+		piece.sort(Comparator.comparingInt(Block::getY));
+
+		if(collapse.effects() && piece.size() >= FireDefaults.COLLAPSE_EFFECT_THRESHOLD) {
+			effects(piece);
+		}
+
+		for(Block block : piece) {
+			if(block.getType().isAir()) {
+				continue;
+			}
+
+			final BlockData data = block.getBlockData();
+			if(data instanceof Bisected || data instanceof Bed || block.getState() instanceof Container) {
+				final BurningBlock burningBlock = fire.get(BlockKey.of(block));
+				if(burningBlock != null) {
+					fire.extinguish(burningBlock);
+				}
+				block.breakNaturally();
+				continue;
+			}
+
+			fall(block, data);
+		}
+	}
+
+	private void fall(Block block, BlockData data) {
 		final Location location = block.getLocation().add(0.5, 0, 0.5);
 		final BurningBlock burningBlock = fire.get(BlockKey.of(block));
 
@@ -102,7 +152,34 @@ public class CollapseManager {
 			fallingBlock.getPersistentDataContainer().set(burningKey, PersistentDataType.STRING,
 					burningBlock.getRemainingTicks() + ";" + burningBlock.getHeat() + ";" + !burningBlock.isBurning());
 		}
+	}
 
-		block.getWorld().playSound(location, data.getSoundGroup().getBreakSound(), 1f, 0.6f);
+	private void effects(List<Block> piece) {
+		final World world = piece.get(0).getWorld();
+		final Map<Material, Integer> counts = new EnumMap<>(Material.class);
+		double x = 0;
+		double y = 0;
+		double z = 0;
+
+		for(Block block : piece) {
+			counts.merge(block.getType(), 1, Integer::sum);
+			x += block.getX() + 0.5;
+			y += block.getY() + 0.5;
+			z += block.getZ() + 0.5;
+		}
+
+		final int size = piece.size();
+		final Location center = new Location(world, x / size, y / size, z / size);
+		final Material dominant = counts.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(Material.STONE);
+		final BlockData dominantData = dominant.createBlockData();
+		final double spread = Math.min(4, 0.5 + Math.cbrt(size));
+		final float volume = (float) Math.min(4, 1 + size / 24.0);
+
+		world.spawnParticle(Particle.BLOCK, center, Math.min(240, size * 8), spread, spread, spread, 0, dominantData);
+		world.spawnParticle(Particle.LARGE_SMOKE, center, Math.min(80, size * 2), spread, spread * 0.6, spread, 0.03);
+		world.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, center, Math.min(30, size), spread, 0.5, spread, 0.02);
+		world.spawnParticle(Particle.WHITE_ASH, center, Math.min(120, size * 4), spread * 1.5, spread, spread * 1.5, 0);
+		world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, volume, 0.5f);
+		world.playSound(center, dominantData.getSoundGroup().getBreakSound(), volume, 0.6f);
 	}
 }

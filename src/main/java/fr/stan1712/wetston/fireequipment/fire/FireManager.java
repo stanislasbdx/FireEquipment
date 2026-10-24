@@ -642,7 +642,7 @@ public class FireManager {
 		unregister(burningBlock.getKey());
 		removeFlames(block);
 		block.setType(Material.AIR);
-		collapse.collapseAbove(block);
+		collapse.collapseAround(block);
 		invalidateEnvironment(burningBlock.getKey(), 3);
 
 		if(burningBlock.getCategory().ash() && ThreadLocalRandom.current().nextDouble() < settings.ash().chance()) {
