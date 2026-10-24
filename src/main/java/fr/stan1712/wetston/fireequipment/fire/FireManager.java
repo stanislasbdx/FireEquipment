@@ -474,7 +474,7 @@ public class FireManager {
 					return;
 				}
 			}
-			if(environment.confined() && burningBlock.heatRatio() >= 0.8 && ThreadLocalRandom.current().nextInt(10) == 0) {
+			if(confinement.flashover() && environment.confined() && burningBlock.heatRatio() >= 0.8 && ThreadLocalRandom.current().nextInt(10) == 0) {
 				flashover(block);
 			}
 			ensureFlames(block);
@@ -571,8 +571,8 @@ public class FireManager {
 				for(int dz = -radius; dz <= radius; dz++) {
 					final Block target = FireBlocks.blockAt(world, block.getX() + dx, block.getY() + dy, block.getZ() + dz);
 					final FireCategory category = target == null ? null : settings.categoryOf(target.getType());
-					if(category != null && hasAirFace(target)) {
-						ignite(target, category.maxHeat() * 0.8);
+					if(category != null && hasAirFace(target) && ThreadLocalRandom.current().nextDouble() < confinement.flashoverIgniteChance()) {
+						ignite(target, category.maxHeat() * confinement.flashoverHeatRatio());
 					}
 				}
 			}

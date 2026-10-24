@@ -57,49 +57,36 @@ ResourcePack:
 realisticFire:
   enabled: true
   worlds: []
-  updateInterval: 10
-  maxBurningBlocks: 3000
-  maxUpdatesPerCycle: 400
-  heat:
-    ignition: 45
-    growth: 6
-    dissipation: 1
-    extinguishThreshold: 15
-    reigniteThreshold: 40
-    reigniteDelay: 10
-  spread:
-    radius: 1
-    baseChance: 0.08
-    heatPerNeighbor: 0.15
-    upwardBonus: 2.0
-  openAir:
-    burnSpeed: 1.25
-    heatDissipation: 3
-    rainCooling: 2
-  confinement:
-    maxRoomVolume: 150
-    burnSpeed: 0.7
-    heatMultiplier: 1.8
-    flashoverRadius: 4
-    flashoverHeat: 600
-    flashoverCooldown: 30
-  water:
-    hoseCooling: 12
-    powderKnockdown: 90
-    powderCooling: 5
-    adjacentWaterCooling: 10
-  heatAura:
-    enabled: true
-    radius: 6
-    warnThreshold: 60
-    igniteThreshold: 150
-    fireTicksPerHeat: 2
-    maxFireTicks: 160
+  performance:
+    updateInterval: 10
+    maxBurningBlocks: 3000
+    maxUpdatesPerCycle: 400
+  features:
+    flashover: true
+    heatAura: true
+    weakBlocks: true
+    collapse: true
+    collapseEffects: true
+    ash: true
+    particles: true
+    scorch: true
+    tnt: true
+  factors:
+    burnTime: 1.0
+    spread: 1.0
+    heat: 1.0
+    cooling: 1.0
+    water: 1.0
+    powder: 1.0
+    flashover: 1.0
+    heatAura: 1.0
+    weakBlocks: 1.0
+    ash: 1.0
+  ash:
+    materials:
+      GRAY_CONCRETE_POWDER: 70
+      GRAVEL: 30
   weakBlocks:
-    enabled: true
-    radius: 4
-    burstHeat: 120
-    burstChance: 0.25
     materials:
       - "GLASS"
       - "TINTED_GLASS"
@@ -108,25 +95,18 @@ realisticFire:
       - "*_GLASS_PANE"
       - "#doors"
       - "#trapdoors"
-  ash:
-    chance: 0.35
-    materials:
-      GRAY_CONCRETE_POWDER: 70
-      GRAVEL: 30
-    particles: true
-    particleDuration: 60
-    maxParticlesPerCycle: 300
   collapse:
-    enabled: true
-    maxHeight: 12
-    minSideSupport: 2
-    excluded:
+    anchors:
       - "BEDROCK"
-      - "OBSIDIAN"
-      - "CRYING_OBSIDIAN"
       - "BARRIER"
       - "REINFORCED_DEEPSLATE"
       - "END_PORTAL_FRAME"
+      - "COMMAND_BLOCK"
+      - "CHAIN_COMMAND_BLOCK"
+      - "REPEATING_COMMAND_BLOCK"
+      - "STRUCTURE_BLOCK"
+      - "JIGSAW"
+      - "LIGHT"
   categories:
     wood:
       burnTime: 45
