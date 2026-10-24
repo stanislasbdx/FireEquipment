@@ -28,8 +28,8 @@ public class PumpTool implements FireTool {
 		final Location loc = player.getEyeLocation();
 		final World world = player.getWorld();
 
-		for(double d = 0; d <= settings.tool(ToolType.PUMP).range(); d += STEP) {
-			loc.add(loc.getDirection());
+		for(double d = STEP; d <= settings.tool(ToolType.PUMP).range(); d += STEP) {
+			loc.add(loc.getDirection().multiply(STEP));
 			world.playSound(loc, Sound.BLOCK_LAVA_EXTINGUISH, 0.5f, -2);
 			world.spawnParticle(Particle.ASH, loc, 10);
 

@@ -33,7 +33,7 @@ public class ExtinguisherTool implements FireTool {
 
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 15, 1));
 
-		for(int step = 0; step <= settings.tool(ToolType.EXTINGUISHER).range(); step++) {
+		for(int step = 0; step < settings.tool(ToolType.EXTINGUISHER).range(); step++) {
 			loc.add(loc.getDirection());
 			world.playSound(loc, Sound.ENTITY_TNT_PRIMED, 3, 10);
 			world.spawnParticle(Particle.FALLING_WATER, loc, 4);

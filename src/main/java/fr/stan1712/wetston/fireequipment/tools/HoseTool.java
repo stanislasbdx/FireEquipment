@@ -43,7 +43,7 @@ public class HoseTool implements FireTool {
 
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 15, 10));
 
-		for(int step = 0; step <= settings.tool(ToolType.HOSE).range(); step++) {
+		for(int step = 0; step < settings.tool(ToolType.HOSE).range(); step++) {
 			loc.add(loc.getDirection());
 			world.playSound(loc, Sound.ENTITY_DOLPHIN_SPLASH, 5, 5);
 			world.spawnParticle(Particle.SPLASH, loc, 20);
