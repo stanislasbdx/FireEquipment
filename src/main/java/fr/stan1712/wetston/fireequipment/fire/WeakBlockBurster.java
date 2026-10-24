@@ -3,7 +3,6 @@ package fr.stan1712.wetston.fireequipment.fire;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -61,7 +60,7 @@ public class WeakBlockBurster {
 		final World world = block.getWorld();
 
 		block.setType(Material.AIR);
-		world.playSound(location, Sound.BLOCK_GLASS_BREAK, 1.2f, 0.8f);
+		world.playSound(location, data.getSoundGroup().getBreakSound(), 1.2f, 0.8f);
 		world.spawnParticle(Particle.BLOCK, location, 30, 0.3, 0.3, 0.3, 0, data);
 		fire.invalidateEnvironment(key, radius + 2);
 	}
