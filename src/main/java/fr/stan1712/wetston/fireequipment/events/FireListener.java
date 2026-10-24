@@ -16,6 +16,7 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
@@ -140,6 +141,11 @@ public class FireListener implements Listener {
 		if(burningBlock != null) {
 			fire.extinguish(burningBlock);
 		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlace(BlockPlaceEvent event) {
+		fire.tryAutoIgnite(event.getBlockPlaced());
 	}
 
 	@EventHandler

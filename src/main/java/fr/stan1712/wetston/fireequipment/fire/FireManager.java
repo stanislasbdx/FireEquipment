@@ -42,6 +42,7 @@ public class FireManager {
 	private final Map<ChunkRef, Set<BlockKey>> byChunk = new HashMap<>();
 	private final ArrayDeque<BlockKey> pending = new ArrayDeque<>();
 	private final Map<BlockKey, Long> flashovers = new HashMap<>();
+	private final Map<ChunkRef, Map<BlockKey, Double>> hotSpots = new HashMap<>();
 
 	private FireSettings settings;
 	private long tick;
@@ -295,6 +296,7 @@ public class FireManager {
 
 	public void unloadChunk(Chunk chunk) {
 		ash.unloadChunk(chunk);
+		hotSpots.remove(ChunkRef.of(chunk));
 
 		final Set<BlockKey> keys = byChunk.get(ChunkRef.of(chunk));
 		final List<BurningBlock> blocks = new ArrayList<>();
@@ -327,15 +329,36 @@ public class FireManager {
 		double total = 0;
 
 		for(BurningBlock burningBlock : burningWithin(world, x, y, z, radius)) {
-			if(burningBlock.isBurning()) {
-				final double distanceSquared = burningBlock.getKey().distanceSquared(x, y, z);
-				if(distanceSquared <= radiusSquared) {
-					total += weighted ? burningBlock.getHeat() / Math.max(1, distanceSquared) : burningBlock.getHeat();
+			final double share = burningBlock.isBurning() ? 1 : FireDefaults.SMOULDERING_HEAT_SHARE;
+			final double distanceSquared = burningBlock.getKey().distanceSquared(x, y, z);
+			total += share * (weighted ? burningBlock.getHeat() / Math.max(1, distanceSquared) : burningBlock.getHeat());
+		}
+
+		for(int cx = ((int) Math.floor(x - radius)) >> 4; cx <= ((int) Math.floor(x + radius)) >> 4; cx++) {
+			for(int cz = ((int) Math.floor(z - radius)) >> 4; cz <= ((int) Math.floor(z + radius)) >> 4; cz++) {
+				final Map<BlockKey, Double> spots = hotSpots.get(new ChunkRef(world, cx, cz));
+				if(spots == null) {
+					continue;
+				}
+				for(Map.Entry<BlockKey, Double> spot : spots.entrySet()) {
+					final double distanceSquared = spot.getKey().distanceSquared(x, y, z);
+					if(distanceSquared <= radiusSquared) {
+						total += FireDefaults.HOT_SPOT_HEAT_SHARE * (weighted ? spot.getValue() / Math.max(1, distanceSquared) : spot.getValue());
+					}
 				}
 			}
 		}
 
 		return total;
+	}
+
+	public boolean tryAutoIgnite(Block block) {
+		if(!isWorldEnabled(block.getWorld()) || settings.categoryOf(block.getType()) == null || burning.containsKey(BlockKey.of(block)) || !hasAirFace(block)) {
+			return false;
+		}
+
+		final double heat = heatAround(block.getWorld().getUID(), block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5, FireDefaults.AUTOIGNITION_RADIUS, true);
+		return heat >= FireDefaults.AUTOIGNITION_HEAT && ignite(block);
 	}
 
 	public List<BurningBlock> burningWithin(UUID world, double x, double y, double z, double radius) {
@@ -401,6 +424,7 @@ public class FireManager {
 		}
 
 		heatAura.tick();
+		coolHotSpots();
 	}
 
 	private void update(BurningBlock burningBlock) {
@@ -648,6 +672,40 @@ public class FireManager {
 		if(burningBlock.getCategory().ash() && ThreadLocalRandom.current().nextDouble() < settings.ash().chance()) {
 			ash.spawn(block);
 		}
+
+		final FireEnvironment.Environment environment = burningBlock.getEnvironment();
+		if(environment != null && environment.confined() && burningBlock.getHeat() > 0) {
+			hotSpots.computeIfAbsent(burningBlock.getKey().chunk(), ref -> new HashMap<>()).merge(burningBlock.getKey(), burningBlock.getHeat(), Math::max);
+		}
+	}
+
+	private void coolHotSpots() {
+		final double cooling = settings.heat().dissipation() * settings.updateInterval() / 20.0;
+		final ThreadLocalRandom random = ThreadLocalRandom.current();
+		final List<Block> candidates = new ArrayList<>();
+
+		hotSpots.values().removeIf(spots -> {
+			spots.entrySet().removeIf(spot -> {
+				spot.setValue(spot.getValue() - cooling);
+				if(spot.getValue() <= 0) {
+					return true;
+				}
+
+				final Block block = spot.getKey().toBlock();
+				if(block != null && random.nextDouble() < FireDefaults.HOT_SPOT_IGNITE_CHANCE) {
+					for(BlockFace face : FireBlocks.FACES) {
+						final Block neighbor = FireBlocks.neighbor(block, face);
+						if(neighbor != null && settings.categoryOf(neighbor.getType()) != null) {
+							candidates.add(neighbor);
+						}
+					}
+				}
+				return false;
+			});
+			return spots.isEmpty();
+		});
+
+		candidates.forEach(this::tryAutoIgnite);
 	}
 
 	private void ensureFlames(Block block) {

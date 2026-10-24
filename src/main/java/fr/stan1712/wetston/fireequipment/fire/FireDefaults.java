@@ -49,6 +49,12 @@ public final class FireDefaults {
 	public static final double WEAK_BURST_HEAT = 120;
 	public static final double WEAK_BURST_CHANCE = 0.25;
 
+	public static final double AUTOIGNITION_HEAT = 60;
+	public static final int AUTOIGNITION_RADIUS = 3;
+	public static final double SMOULDERING_HEAT_SHARE = 0.5;
+	public static final double HOT_SPOT_HEAT_SHARE = 0.5;
+	public static final double HOT_SPOT_IGNITE_CHANCE = 0.2;
+
 	public static final double ASH_CHANCE = 0.35;
 	public static final double ASH_PARTICLE_SECONDS = 60;
 	public static final int MAX_PARTICLES_PER_CYCLE = 300;
