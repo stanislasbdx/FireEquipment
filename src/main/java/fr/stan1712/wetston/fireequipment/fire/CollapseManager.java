@@ -218,7 +218,7 @@ public class CollapseManager {
 		final Material dominant = counts.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(Material.STONE);
 		final BlockData dominantData = dominant.createBlockData();
 		final double spread = Math.min(4, 0.5 + Math.cbrt(size));
-		final float volume = (float) Math.min(4, 1 + size / 24.0);
+		final float volume = (float) Math.min(FireDefaults.COLLAPSE_MAX_VOLUME, 2 + size / 8.0);
 
 		world.spawnParticle(Particle.BLOCK, center, Math.min(240, size * 8), spread, spread, spread, 0, dominantData);
 		world.spawnParticle(Particle.LARGE_SMOKE, center, Math.min(80, size * 2), spread, spread * 0.6, spread, 0.03);

@@ -651,8 +651,8 @@ public class FireManager {
 			}
 		}
 
-		world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1.5f, 0.5f);
-		world.playSound(center, Sound.BLOCK_FIRE_AMBIENT, 2f, 0.6f);
+		world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, FireDefaults.FLASHOVER_VOLUME, 0.5f);
+		world.playSound(center, Sound.BLOCK_FIRE_AMBIENT, FireDefaults.FLASHOVER_VOLUME, 0.6f);
 		world.spawnParticle(Particle.FLAME, center, 150, radius / 2.0, radius / 2.0, radius / 2.0, 0.05);
 		_log.debug("[flashover] Flashover at {} {} {}", block.getX(), block.getY(), block.getZ());
 	}

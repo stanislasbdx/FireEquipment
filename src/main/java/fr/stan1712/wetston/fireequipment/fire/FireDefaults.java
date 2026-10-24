@@ -41,6 +41,7 @@ public final class FireDefaults {
 	public static final double FLASHOVER_COOLDOWN_SECONDS = 30;
 	public static final double FLASHOVER_IGNITE_CHANCE = 0.6;
 	public static final double FLASHOVER_HEAT_RATIO = 0.5;
+	public static final float FLASHOVER_VOLUME = 6;
 
 	public static final double HOSE_COOLING = 12;
 	public static final double POWDER_KNOCKDOWN = 90;
@@ -76,4 +77,5 @@ public final class FireDefaults {
 
 	public static final int COLLAPSE_MAX_STRUCTURE = 128;
 	public static final int COLLAPSE_EFFECT_THRESHOLD = 6;
+	public static final double COLLAPSE_MAX_VOLUME = 8;
 }
