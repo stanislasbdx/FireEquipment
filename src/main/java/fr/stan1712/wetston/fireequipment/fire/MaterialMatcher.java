@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class MaterialMatcher {
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Fire");
@@ -38,10 +39,16 @@ public class MaterialMatcher {
 				materials.addAll(tag.getValues());
 			}
 			else if(entry.contains("*")) {
-				final Pattern pattern = Pattern.compile(entry.toUpperCase(Locale.ROOT).replace("*", ".*"));
-				Arrays.stream(Material.values())
+				final String name = entry.toUpperCase(Locale.ROOT).replaceFirst("^MINECRAFT:", "");
+				final Pattern pattern = Pattern.compile(Arrays.stream(name.split("\\*", -1)).map(Pattern::quote).collect(Collectors.joining(".*")));
+				final List<Material> matched = Arrays.stream(Material.values())
 						.filter(material -> !material.isLegacy() && material.isBlock() && pattern.matcher(material.name()).matches())
-						.forEach(materials::add);
+						.toList();
+
+				if(matched.isEmpty()) {
+					_log.warn("[MaterialMatcher] No block matches {}", entry);
+				}
+				materials.addAll(matched);
 			}
 			else {
 				final Material material = Material.matchMaterial(entry);
