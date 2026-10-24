@@ -5,6 +5,13 @@ public final class FireDefaults {
 		throw new IllegalStateException("Utility class");
 	}
 
+	public static final double AMBIENT_CELSIUS = 20;
+	public static final double CELSIUS_PER_HEAT = 5;
+
+	public static double celsius(double heat) {
+		return AMBIENT_CELSIUS + heat * CELSIUS_PER_HEAT;
+	}
+
 	public static final int UPDATE_INTERVAL = 10;
 	public static final int MAX_BURNING_BLOCKS = 3000;
 	public static final int MAX_UPDATES_PER_CYCLE = 400;

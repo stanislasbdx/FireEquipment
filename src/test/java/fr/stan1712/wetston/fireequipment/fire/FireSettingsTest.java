@@ -49,4 +49,10 @@ class FireSettingsTest {
 		assertFalse(settings.confinement().flashover());
 		assertFalse(settings.heatAura().enabled());
 	}
+
+	@Test
+	void convertsHeatToCelsius() {
+		assertEquals(FireDefaults.AMBIENT_CELSIUS, FireDefaults.celsius(0));
+		assertEquals(520, FireDefaults.celsius(100));
+	}
 }

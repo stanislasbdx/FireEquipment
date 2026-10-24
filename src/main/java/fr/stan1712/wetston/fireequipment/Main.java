@@ -162,6 +162,6 @@ public final class Main extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		if(toolListener != null) toolListener.shutdown();
-		if(fireManager != null) fireManager.stop();
+		if(fireManager != null) fireManager.shutdown();
 	}
 }

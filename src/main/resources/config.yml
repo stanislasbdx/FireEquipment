@@ -30,14 +30,17 @@ Core:
       On: "Inspect mode enabled"
       Off: "Inspect mode disabled"
       Disabled: "Realistic fire is disabled in this world"
-      Heat: "Heat"
-      Burning: "Burning"
-      Smouldering: "Smouldering"
-      Flammable: "Flammable"
+      Camera: "Thermal camera"
       Inert: "Inert"
       OpenAir: "Open air"
       Ventilated: "Ventilated"
       Confined: "Confined"
+      Categories:
+        wood: "Wood"
+        foliage: "Vegetation"
+        textile: "Textile"
+        paper: "Paper"
+        fuel: "Fuel"
 
 Equipment:
   Hose:

@@ -44,6 +44,7 @@ public class FireManager {
 	private final Map<ChunkRef, Set<BlockKey>> byChunk = new HashMap<>();
 	private final ArrayDeque<BlockKey> pending = new ArrayDeque<>();
 	private final Map<BlockKey, Long> flashovers = new HashMap<>();
+	private final List<Runnable> shutdownHooks = new ArrayList<>();
 	private final Map<ChunkRef, Map<BlockKey, Double>> hotSpots = new HashMap<>();
 
 	private FireSettings settings;
@@ -75,6 +76,15 @@ public class FireManager {
 		}
 
 		_log.info("[{}] Realistic fire {} in worlds {}", logStep, settings.enabled() ? "enabled" : "disabled", settings.worlds());
+	}
+
+	public void addShutdownHook(Runnable hook) {
+		shutdownHooks.add(hook);
+	}
+
+	public void shutdown() {
+		shutdownHooks.forEach(Runnable::run);
+		stop();
 	}
 
 	public void stop() {
