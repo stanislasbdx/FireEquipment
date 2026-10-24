@@ -83,7 +83,9 @@ public final class FireDefaults {
 
 	public static final double ASH_CHANCE = 0.35;
 	public static final double ASH_PARTICLE_SECONDS = 60;
-	public static final int MAX_PARTICLES_PER_CYCLE = 300;
+	public static final int MAX_PARTICLES_PER_CYCLE = 1200;
+	public static final double INTENSE_FIRE_RATIO = 0.6;
+	public static final int SMOKE_BLINDNESS_TICKS = 40;
 
 	public static final int COLLAPSE_MAX_STRUCTURE = 128;
 	public static final int COLLAPSE_EFFECT_THRESHOLD = 6;

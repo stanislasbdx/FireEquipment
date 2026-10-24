@@ -35,9 +35,9 @@ public record FireSettings(
 	private static final Logger _log = LoggerFactory.getLogger("FireEquipment - Fire");
 	private static final String ROOT = "realisticFire.";
 
-	public record Features(boolean flashover, boolean backdraft, boolean heatAura, boolean weakBlocks, boolean collapse, boolean collapseEffects, boolean ash, boolean particles, boolean scorch, boolean tnt) {}
+	public record Features(boolean flashover, boolean backdraft, boolean heatAura, boolean weakBlocks, boolean collapse, boolean collapseEffects, boolean ash, boolean particles, boolean smoke, boolean scorch, boolean tnt) {}
 
-	public record Factors(double burnTime, double spread, double heat, double cooling, double water, double powder, double flashover, double heatAura, double weakBlocks, double ash, double scorch) {}
+	public record Factors(double burnTime, double spread, double heat, double cooling, double water, double powder, double flashover, double heatAura, double weakBlocks, double ash, double scorch, double particles) {}
 
 	public record Heat(double ignition, double growth, double dissipation, double extinguishThreshold, double reigniteThreshold, int reigniteDelay) {}
 
@@ -53,7 +53,7 @@ public record FireSettings(
 
 	public record WeakBlocks(boolean enabled, int radius, double burstHeat, double burstChance, Set<Material> materials) {}
 
-	public record Ash(double chance, WeightedMaterials materials, boolean particles, int particleDuration, int maxParticlesPerCycle) {
+	public record Ash(double chance, WeightedMaterials materials, boolean particles, double particleDensity, int particleDuration, int maxParticlesPerCycle) {
 		public Material pick() {
 			return materials.pick();
 		}
@@ -85,6 +85,7 @@ public record FireSettings(
 				feature(config, "collapseEffects"),
 				feature(config, "ash"),
 				feature(config, "particles"),
+				feature(config, "smoke"),
 				feature(config, "scorch"),
 				feature(config, "tnt")
 		);
@@ -99,7 +100,8 @@ public record FireSettings(
 				factor(config, "heatAura"),
 				factor(config, "weakBlocks"),
 				factor(config, "ash"),
-				factor(config, "scorch")
+				factor(config, "scorch"),
+				factor(config, "particles")
 		);
 
 		return new FireSettings(
@@ -194,8 +196,9 @@ public record FireSettings(
 				features.ash() ? Math.min(1, FireDefaults.ASH_CHANCE * factors.ash()) : 0,
 				WeightedMaterials.read(config.getConfigurationSection(ROOT + "ash.materials"), Material.GRAY_CONCRETE_POWDER),
 				features.particles(),
+				factors.particles(),
 				seconds(FireDefaults.ASH_PARTICLE_SECONDS),
-				FireDefaults.MAX_PARTICLES_PER_CYCLE
+				(int) Math.round(FireDefaults.MAX_PARTICLES_PER_CYCLE * Math.max(1, factors.particles()))
 		);
 	}
 

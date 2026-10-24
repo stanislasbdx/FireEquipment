@@ -9,6 +9,8 @@ import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class HeatAura {
 	private final FireManager fire;
@@ -52,6 +54,24 @@ public class HeatAura {
 			player.spawnParticle(Particle.SMOKE, location, 4, 0.4, 0.6, 0.4, 0.01);
 			player.playSound(location, Sound.BLOCK_FIRE_AMBIENT, 0.4f, 1.4f);
 		}
+
+		smoke(player, heat, aura);
+	}
+
+	private void smoke(Player player, double heat, FireSettings.HeatAura aura) {
+		if(!fire.getSettings().features().smoke()) {
+			return;
+		}
+
+		final boolean outdoors = FireEnvironment.isExposed(player.getEyeLocation().getBlock());
+		if(heat < (outdoors ? aura.igniteThreshold() : aura.warnThreshold())) {
+			return;
+		}
+
+		player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, FireDefaults.SMOKE_BLINDNESS_TICKS, 0, true, false, false));
+		final Location eyes = player.getEyeLocation().add(player.getLocation().getDirection().multiply(0.6));
+		player.spawnParticle(Particle.LARGE_SMOKE, eyes, 12, 0.3, 0.3, 0.3, 0.01);
+		player.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, eyes, 2, 0.2, 0.2, 0.2, 0.01);
 	}
 
 	private static int fireProtection(Player player) {

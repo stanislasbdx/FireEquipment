@@ -86,6 +86,7 @@ realisticFire:
     collapseEffects: true
     ash: true
     particles: true
+    smoke: true
     scorch: true
     tnt: true
   factors:
@@ -100,6 +101,7 @@ realisticFire:
     weakBlocks: 1.0
     ash: 1.0
     scorch: 1.0
+    particles: 1.0
   ash:
     materials:
       GRAY_CONCRETE_POWDER: 70

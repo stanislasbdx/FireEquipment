@@ -523,7 +523,7 @@ public class FireManager {
 				flashover(block);
 			}
 			ensureFlames(block);
-			burningEffects(burningBlock, block, environment);
+			burningEffects(burningBlock, block, environment, burningNeighbors);
 		}
 		else {
 			final double radiant = burningNeighbors * heatSettings.growth() * settings.spread().heatPerNeighbor() * oxygen;
@@ -744,7 +744,7 @@ public class FireManager {
 		return false;
 	}
 
-	private void burningEffects(BurningBlock burningBlock, Block block, FireEnvironment.Environment environment) {
+	private void burningEffects(BurningBlock burningBlock, Block block, FireEnvironment.Environment environment, int burningNeighbors) {
 		if(particleBudget <= 0) {
 			return;
 		}
@@ -752,26 +752,34 @@ public class FireManager {
 		final World world = block.getWorld();
 		final Location top = block.getLocation().add(0.5, 1.2, 0.5);
 		final ThreadLocalRandom random = ThreadLocalRandom.current();
-		final int whiteAsh = (int) Math.ceil(4 * burningBlock.heatRatio());
+		final double ratio = burningBlock.heatRatio();
+		final double density = settings.ash().particleDensity() * (1 + burningNeighbors * 0.5);
 
-		world.spawnParticle(Particle.WHITE_ASH, top, whiteAsh, 1.5, 1.5, 1.5, 0);
-		particleBudget -= whiteAsh;
+		particleBudget -= spawn(world, Particle.WHITE_ASH, top, 4 * ratio * density, 1.5, 1.5, 1.5, 0);
+		particleBudget -= spawn(world, Particle.LARGE_SMOKE, top, 1.5 * ratio * density, 0.3, 0.5, 0.3, 0.03);
+		particleBudget -= spawn(world, Particle.ASH, top, 2 * ratio * density, 1.2, 1.2, 1.2, 0);
 
-		if(random.nextDouble() < 0.4) {
-			world.spawnParticle(Particle.LARGE_SMOKE, top, 1, 0.2, 0.3, 0.2, 0.02);
-			particleBudget--;
+		if(ratio >= FireDefaults.INTENSE_FIRE_RATIO) {
+			final Location center = block.getLocation().add(0.5, 0.6, 0.5);
+			particleBudget -= spawn(world, Particle.FLAME, center, 4 * ratio * density, 0.5, 0.6, 0.5, 0.02);
+			particleBudget -= spawn(world, Particle.LAVA, top, 0.6 * ratio * density, 0.3, 0.2, 0.3, 0);
+			particleBudget -= spawn(world, Particle.SMOKE, top, 3 * ratio * density, 0.4, 0.6, 0.4, 0.04);
 		}
-		if(random.nextDouble() < 0.1) {
-			world.spawnParticle(Particle.ASH, top, 4, 1, 1, 1, 0);
-			particleBudget -= 4;
-		}
-		if(environment.openAir() && burningBlock.heatRatio() > 0.7 && random.nextDouble() < 0.08) {
+		if(ratio > 0.7 && random.nextDouble() < (environment.openAir() ? 0.25 : 0.1) * density) {
 			world.spawnParticle(Particle.CAMPFIRE_SIGNAL_SMOKE, top, 0, 0, 0.08, 0);
 			particleBudget--;
 		}
-		if(random.nextDouble() < 0.05) {
-			world.playSound(top, Sound.BLOCK_FIRE_AMBIENT, 0.8f, 0.8f + random.nextFloat() * 0.4f);
+		if(random.nextDouble() < 0.05 + 0.1 * ratio) {
+			world.playSound(top, Sound.BLOCK_FIRE_AMBIENT, 0.8f + (float) ratio, 0.8f + random.nextFloat() * 0.4f);
 		}
+	}
+
+	private static int spawn(World world, Particle particle, Location location, double amount, double dx, double dy, double dz, double speed) {
+		final int count = (int) Math.floor(amount + ThreadLocalRandom.current().nextDouble());
+		if(count > 0) {
+			world.spawnParticle(particle, location, count, dx, dy, dz, speed);
+		}
+		return count;
 	}
 
 	private void smoulderEffects(Block block) {

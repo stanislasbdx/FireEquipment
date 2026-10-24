@@ -27,6 +27,7 @@ class FireSettingsTest {
 		config.set("realisticFire.factors.water", 0.5);
 		config.set("realisticFire.factors.heatAura", 2);
 		config.set("realisticFire.factors.scorch", 3);
+		config.set("realisticFire.factors.particles", 2);
 
 		final FireSettings settings = FireSettings.load(config);
 
@@ -36,6 +37,8 @@ class FireSettingsTest {
 		assertEquals(FireDefaults.HOSE_COOLING / 2, settings.water().hoseCooling());
 		assertEquals(FireDefaults.AURA_IGNITE_THRESHOLD / 2, settings.heatAura().igniteThreshold());
 		assertEquals(FireDefaults.SCORCH_CHANCE_PER_SECOND * 3, settings.scorch().chancePerSecond(), 1e-9);
+		assertEquals(2, settings.ash().particleDensity());
+		assertEquals(FireDefaults.MAX_PARTICLES_PER_CYCLE * 2, settings.ash().maxParticlesPerCycle());
 	}
 
 	@Test
@@ -44,12 +47,14 @@ class FireSettingsTest {
 		config.set("realisticFire.features.ash", false);
 		config.set("realisticFire.features.flashover", false);
 		config.set("realisticFire.features.heatAura", false);
+		config.set("realisticFire.features.smoke", false);
 
 		final FireSettings settings = FireSettings.load(config);
 
 		assertEquals(0, settings.ash().chance());
 		assertFalse(settings.confinement().flashover());
 		assertFalse(settings.heatAura().enabled());
+		assertFalse(settings.features().smoke());
 	}
 
 	@Test
