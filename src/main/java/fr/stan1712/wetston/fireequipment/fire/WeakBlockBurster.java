@@ -18,7 +18,9 @@ public class WeakBlockBurster {
 
 	public void scanAround(Block center) {
 		final FireSettings.WeakBlocks weakBlocks = fire.getSettings().weakBlocks();
-		if(!weakBlocks.enabled() || weakBlocks.materials().isEmpty()) {
+		final boolean bursts = weakBlocks.enabled() && !weakBlocks.materials().isEmpty();
+		final boolean tnt = fire.getSettings().features().tnt();
+		if(!bursts && !tnt) {
 			return;
 		}
 
@@ -30,12 +32,22 @@ public class WeakBlockBurster {
 			for(int dy = -radius; dy <= radius; dy++) {
 				for(int dz = -radius; dz <= radius; dz++) {
 					final Block target = FireBlocks.blockAt(world, center.getX() + dx, center.getY() + dy, center.getZ() + dz);
-					if(target == null || !weakBlocks.materials().contains(target.getType())) {
+					if(target == null) {
+						continue;
+					}
+
+					final boolean isTnt = tnt && target.getType() == Material.TNT;
+					if(!isTnt && !(bursts && weakBlocks.materials().contains(target.getType()))) {
 						continue;
 					}
 
 					final double heat = fire.heatAround(world.getUID(), target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5, radius, true);
-					if(heat >= weakBlocks.burstHeat() && random.nextDouble() < weakBlocks.burstChance()) {
+					if(isTnt) {
+						if(heat >= FireDefaults.TNT_PRIME_HEAT && random.nextDouble() < FireDefaults.TNT_PRIME_CHANCE) {
+							fire.primeTnt(target);
+						}
+					}
+					else if(heat >= weakBlocks.burstHeat() && random.nextDouble() < weakBlocks.burstChance()) {
 						burst(target, radius);
 					}
 				}

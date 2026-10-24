@@ -2,6 +2,7 @@ package fr.stan1712.wetston.fireequipment.fire;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -12,6 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.Fire;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.slf4j.Logger;
@@ -561,12 +563,19 @@ public class FireManager {
 						continue;
 					}
 
+					final double vertical = dy > 0 ? spread.upwardBonus() : dy < 0 ? 0.5 : 1;
+					if(target.getType() == Material.TNT) {
+						if(random.nextDouble() < base * vertical / distanceSquared) {
+							primeTnt(target);
+						}
+						continue;
+					}
+
 					final FireCategory category = settings.categoryOf(target.getType());
 					if(category == null || burning.containsKey(BlockKey.of(target))) {
 						continue;
 					}
 
-					final double vertical = dy > 0 ? spread.upwardBonus() : dy < 0 ? 0.5 : 1;
 					if(random.nextDouble() < base * category.ignitionChance() * vertical / distanceSquared && hasAirFace(target)) {
 						ignite(target);
 					}
@@ -590,6 +599,16 @@ public class FireManager {
 		ground.setType(ground.getType() == Material.DIRT ? Material.COARSE_DIRT : scorch.materials().pick());
 	}
 
+	public void primeTnt(Block block) {
+		final World world = block.getWorld();
+		if(!settings.features().tnt() || Boolean.FALSE.equals(world.getGameRuleValue(GameRule.TNT_EXPLODES))) {
+			return;
+		}
+
+		block.setType(Material.AIR);
+		world.spawn(block.getLocation().add(0.5, 0, 0.5), TNTPrimed.class, tnt -> tnt.setFuseTicks(FireDefaults.TNT_FUSE_TICKS));
+	}
+
 	private void flashover(Block block) {
 		final FireSettings.Confinement confinement = settings.confinement();
 		final BlockKey zone = new BlockKey(block.getWorld().getUID(), block.getX() >> 3, block.getY() >> 3, block.getZ() >> 3);
@@ -610,6 +629,10 @@ public class FireManager {
 			for(int dy = -radius; dy <= radius; dy++) {
 				for(int dz = -radius; dz <= radius; dz++) {
 					final Block target = FireBlocks.blockAt(world, block.getX() + dx, block.getY() + dy, block.getZ() + dz);
+					if(target != null && target.getType() == Material.TNT) {
+						primeTnt(target);
+						continue;
+					}
 					final FireCategory category = target == null ? null : settings.categoryOf(target.getType());
 					if(category != null && hasAirFace(target) && ThreadLocalRandom.current().nextDouble() < confinement.flashoverIgniteChance()) {
 						ignite(target, category.maxHeat() * confinement.flashoverHeatRatio());
