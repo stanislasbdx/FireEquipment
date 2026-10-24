@@ -35,6 +35,12 @@ Core:
       OpenAir: "Open air"
       Ventilated: "Ventilated"
       Confined: "Confined"
+      Pressure:
+        Opening: "Opening"
+        Label: "Pressure"
+        Low: "Low"
+        Moderate: "Moderate"
+        Critical: "Critical"
       Categories:
         wood: "Wood"
         foliage: "Vegetation"

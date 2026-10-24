@@ -65,6 +65,7 @@ public final class FireDefaults {
 	public static final double EPHEMERAL_FLAME_CHANCE = 0.25;
 	public static final int BACKDRAFT_RADIUS = 4;
 	public static final double BACKDRAFT_HEAT_SHARE = 0.5;
+	public static final double BACKDRAFT_VENTILATED_HEAT_SHARE = 1;
 	public static final long BACKDRAFT_DELAY_TICKS = 20;
 	public static final int BACKDRAFT_REACH = 6;
 	public static final int BACKDRAFT_FIRE_TICKS = 100;

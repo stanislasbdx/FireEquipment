@@ -8,6 +8,11 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Openable;
+import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.Gate;
+import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -141,6 +146,10 @@ public class FireInspector {
 			block = support == null ? block : support;
 		}
 
+		if(isOpening(block)) {
+			return opening(block);
+		}
+
 		final BurningBlock burningBlock = fire.get(BlockKey.of(block));
 		final FireCategory category = burningBlock != null ? burningBlock.getCategory() : fire.getSettings().categoryOf(block.getType());
 		final double heat = burningBlock != null
@@ -150,6 +159,27 @@ public class FireInspector {
 		final String label = category == null ? "&7" + text("Inert") : "&f" + categoryName(category);
 
 		return label + " &8· " + color(celsius) + Math.round(celsius) + " °C &8· &7" + environment(block);
+	}
+
+	private static boolean isOpening(Block block) {
+		final BlockData data = block.getBlockData();
+		return (data instanceof Door || data instanceof TrapDoor || data instanceof Gate) && !((Openable) data).isOpen();
+	}
+
+	private String opening(Block block) {
+		final Backdraft.Pressure pressure = fire.getBackdraft().assess(block);
+		final String level;
+		if(pressure.ratio() >= 1) {
+			level = "&c" + text("Pressure.Critical");
+		} else if(pressure.ratio() >= 0.5) {
+			level = "&e" + text("Pressure.Moderate");
+		} else {
+			level = "&a" + text("Pressure.Low");
+		}
+
+		final double heat = fire.heatAround(block.getWorld().getUID(), block.getX() + 0.5, block.getY() + 0.5, block.getZ() + 0.5, fire.getSettings().heatAura().radius(), true);
+		final double celsius = FireDefaults.celsius(heat);
+		return "&f" + text("Pressure.Opening") + " &8· &7" + text("Pressure.Label") + " : " + level + " &8· " + color(celsius) + Math.round(celsius) + " °C";
 	}
 
 	private Block burningSupport(Block fireBlock) {

@@ -25,6 +25,10 @@ public class Backdraft {
 		this.fire = fire;
 	}
 
+	public record Pressure(Block room, double ratio, boolean confined) {
+		public static final Pressure NONE = new Pressure(null, 0, false);
+	}
+
 	public void onOpened(Block opening) {
 		final FireSettings settings = fire.getSettings();
 		if(!settings.features().backdraft() || !fire.isWorldEnabled(opening.getWorld())) {
@@ -32,6 +36,26 @@ public class Backdraft {
 		}
 
 		fire.invalidateEnvironment(BlockKey.of(opening), FireDefaults.BACKDRAFT_RADIUS * 2);
+
+		final Pressure pressure = assess(opening);
+		if(pressure.room() == null || pressure.ratio() < 1 || fire.isZoneCoolingDown(pressure.room())) {
+			return;
+		}
+
+		final Block room = pressure.room();
+		fire.claimZone(room);
+		final Location center = opening.getLocation().add(0.5, 0.5, 0.5);
+		final Vector outward = center.toVector().subtract(room.getLocation().add(0.5, 0.5, 0.5).toVector()).normalize();
+		inhale(center, outward, pressure.confined() ? 0.5 : 0.25);
+
+		Bukkit.getScheduler().runTaskLater(plugin, () -> explode(center, room, outward), FireDefaults.BACKDRAFT_DELAY_TICKS);
+	}
+
+	public Pressure assess(Block opening) {
+		final FireSettings settings = fire.getSettings();
+		if(!settings.features().backdraft() || !fire.isWorldEnabled(opening.getWorld())) {
+			return Pressure.NONE;
+		}
 
 		final Set<Long> blocked = new HashSet<>();
 		blocked.add(BlockKey.of(opening).pack());
@@ -42,40 +66,30 @@ public class Backdraft {
 			}
 		}
 
-		Block room = null;
-		double hottest = 0;
+		Pressure worst = Pressure.NONE;
 		for(BlockFace face : FireBlocks.FACES) {
 			final Block cell = FireBlocks.neighbor(opening, face);
-			if(cell == null || !FireEnvironment.isTraversable(cell) || fire.isZoneCoolingDown(cell)) {
-				continue;
-			}
-
-			final FireEnvironment.Environment environment = FireEnvironment.room(cell, blocked, settings.confinement().maxRoomVolume());
-			if(!environment.confined()) {
+			if(cell == null || !FireEnvironment.isTraversable(cell)) {
 				continue;
 			}
 
 			final double heat = fire.heatAround(cell.getWorld().getUID(), cell.getX() + 0.5, cell.getY() + 0.5, cell.getZ() + 0.5, FireDefaults.BACKDRAFT_RADIUS, false);
-			if(heat > hottest) {
-				hottest = heat;
-				room = cell;
+			if(heat <= 0) {
+				continue;
+			}
+
+			final FireEnvironment.Environment environment = FireEnvironment.room(cell, blocked, settings.confinement().maxRoomVolume());
+			final double share = environment.confined() ? FireDefaults.BACKDRAFT_HEAT_SHARE : FireDefaults.BACKDRAFT_VENTILATED_HEAT_SHARE;
+			final double ratio = heat / (settings.confinement().flashoverHeat() * share);
+			if(ratio > worst.ratio()) {
+				worst = new Pressure(cell, ratio, environment.confined());
 			}
 		}
 
-		if(room == null || hottest < settings.confinement().flashoverHeat() * FireDefaults.BACKDRAFT_HEAT_SHARE) {
-			return;
-		}
-
-		fire.claimZone(room);
-		final Location center = opening.getLocation().add(0.5, 0.5, 0.5);
-		final Vector outward = center.toVector().subtract(room.getLocation().add(0.5, 0.5, 0.5).toVector()).normalize();
-		inhale(center, outward);
-
-		final Block target = room;
-		Bukkit.getScheduler().runTaskLater(plugin, () -> explode(center, target, outward), FireDefaults.BACKDRAFT_DELAY_TICKS);
+		return worst;
 	}
 
-	private void inhale(Location center, Vector outward) {
+	private void inhale(Location center, Vector outward, double pull) {
 		final World world = center.getWorld();
 		world.playSound(center, Sound.ENTITY_BREEZE_INHALE, 3f, 0.6f);
 		world.spawnParticle(Particle.GUST, center, 3, 0.3, 0.5, 0.3, 0);
@@ -90,7 +104,7 @@ public class Backdraft {
 
 		for(Player player : world.getPlayers()) {
 			if(isExposed(player, center, outward)) {
-				player.setVelocity(player.getVelocity().add(outward.clone().multiply(-0.5).setY(0.1)));
+				player.setVelocity(player.getVelocity().add(outward.clone().multiply(-pull).setY(0.1)));
 			}
 		}
 	}
