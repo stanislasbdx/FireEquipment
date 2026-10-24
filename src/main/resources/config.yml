@@ -25,6 +25,19 @@ Core:
     Burning: "Burning blocks"
     Smouldering: "Smouldering blocks"
     Cleared: "burning blocks extinguished"
+    PlayersOnly: "Only players can do that"
+    Inspect:
+      On: "Inspect mode enabled"
+      Off: "Inspect mode disabled"
+      Disabled: "Realistic fire is disabled in this world"
+      Heat: "Heat"
+      Burning: "Burning"
+      Smouldering: "Smouldering"
+      Flammable: "Flammable"
+      Inert: "Inert"
+      OpenAir: "Open air"
+      Ventilated: "Ventilated"
+      Confined: "Confined"
 
 Equipment:
   Hose:

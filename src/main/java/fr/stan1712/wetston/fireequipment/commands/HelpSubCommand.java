@@ -21,7 +21,7 @@ class HelpSubCommand implements SubCommand {
 			"/firequip help = " + messages.get("Core.HelpMsg.DHelp"),
 			"/firequip version = " + messages.get("Core.HelpMsg.DVersion"),
 			"/firequip reload = " + messages.get("Core.HelpMsg.DReload"),
-			"/firequip fire <stats/clear [radius]> = " + messages.get("Core.HelpMsg.DFire"),
+			"/firequip fire <stats/clear [radius]/inspect> = " + messages.get("Core.HelpMsg.DFire"),
 			"/fequip <item> = " + messages.get("Core.HelpMsg.DGive")
 		);
 	}

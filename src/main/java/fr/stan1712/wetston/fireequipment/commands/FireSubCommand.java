@@ -1,6 +1,7 @@
 package fr.stan1712.wetston.fireequipment.commands;
 
 import fr.stan1712.wetston.fireequipment.fire.BlockKey;
+import fr.stan1712.wetston.fireequipment.fire.FireInspector;
 import fr.stan1712.wetston.fireequipment.fire.FireManager;
 import fr.stan1712.wetston.fireequipment.messages.Messages;
 import org.bukkit.command.CommandSender;
@@ -10,14 +11,17 @@ import java.util.List;
 import java.util.Locale;
 
 class FireSubCommand implements SubCommand {
-	private static final List<String> ACTIONS = List.of("stats", "clear");
+	private static final String ADMIN_PERMISSION = "firequip.admin.fire";
+	private static final String INSPECT = "inspect";
 
 	private final FireManager fire;
 	private final Messages messages;
+	private final FireInspector inspector;
 
-	FireSubCommand(FireManager fire, Messages messages) {
+	FireSubCommand(FireManager fire, Messages messages, FireInspector inspector) {
 		this.fire = fire;
 		this.messages = messages;
+		this.inspector = inspector;
 	}
 
 	@Override
@@ -27,12 +31,16 @@ class FireSubCommand implements SubCommand {
 
 	@Override
 	public String permission() {
-		return "firequip.admin.fire";
+		return "firequip.inspect";
 	}
 
 	@Override
 	public void execute(CommandSender sender, String[] args) {
-		if(args.length >= 2 && args[1].equalsIgnoreCase("clear")) {
+		if(args.length >= 2 && args[1].equalsIgnoreCase(INSPECT)) {
+			inspect(sender);
+		} else if(!sender.hasPermission(ADMIN_PERMISSION)) {
+			messages.noPermission(sender);
+		} else if(args.length >= 2 && args[1].equalsIgnoreCase("clear")) {
 			clear(sender, args);
 		} else {
 			stats(sender);
@@ -44,7 +52,18 @@ class FireSubCommand implements SubCommand {
 		if(args.length != 2) return List.of();
 
 		final String typed = args[1].toLowerCase(Locale.ROOT);
-		return ACTIONS.stream().filter(action -> action.startsWith(typed)).toList();
+		final List<String> actions = sender.hasPermission(ADMIN_PERMISSION) ? List.of("stats", "clear", INSPECT) : List.of(INSPECT);
+		return actions.stream().filter(action -> action.startsWith(typed)).toList();
+	}
+
+	private void inspect(CommandSender sender) {
+		if(!(sender instanceof Player player)) {
+			messages.box(sender, messages.get("Core.FireMsg.PlayersOnly"));
+			return;
+		}
+
+		final boolean enabled = inspector.toggle(player);
+		messages.box(sender, messages.get(enabled ? "Core.FireMsg.Inspect.On" : "Core.FireMsg.Inspect.Off"));
 	}
 
 	private void clear(CommandSender sender, String[] args) {

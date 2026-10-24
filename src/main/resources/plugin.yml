@@ -24,3 +24,8 @@ permissions:
   firequip.admin.fire:
     description: View realistic fire stats and extinguish fires.
     default: op
+    children:
+      firequip.inspect: true
+  firequip.inspect:
+    description: Toggle the firefighter inspect view of the realistic fire.
+    default: op

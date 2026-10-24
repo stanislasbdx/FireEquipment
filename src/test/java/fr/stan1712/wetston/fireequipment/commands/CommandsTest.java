@@ -21,11 +21,12 @@ class CommandsTest {
 	private ServerMock server;
 	private FireEquipmentCommand fireEquipment;
 	private GiveCommand give;
+	private Plugin plugin;
 
 	@BeforeEach
 	void setUp() {
 		server = MockBukkit.mock();
-		final Plugin plugin = MockBukkit.createMockPlugin();
+		plugin = MockBukkit.createMockPlugin();
 		final PluginSettings settings = new PluginSettings(plugin);
 		final Messages messages = new Messages(plugin, settings);
 
@@ -36,6 +37,18 @@ class CommandsTest {
 	@AfterEach
 	void tearDown() {
 		MockBukkit.unmock();
+	}
+
+	@Test
+	void completesFireActionsByPermission() {
+		final PlayerMock op = server.addPlayer();
+		op.setOp(true);
+		final PlayerMock inspector = server.addPlayer();
+		inspector.addAttachment(plugin, "firequip.info", true);
+		inspector.addAttachment(plugin, "firequip.inspect", true);
+
+		assertEquals(List.of("stats", "clear", "inspect"), fireEquipment.onTabComplete(op, null, "firequip", new String[]{"fire", ""}));
+		assertEquals(List.of("inspect"), fireEquipment.onTabComplete(inspector, null, "firequip", new String[]{"fire", ""}));
 	}
 
 	@Test

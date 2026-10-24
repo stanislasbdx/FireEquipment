@@ -1,6 +1,7 @@
 package fr.stan1712.wetston.fireequipment.commands;
 
 import fr.stan1712.wetston.fireequipment.config.PluginSettings;
+import fr.stan1712.wetston.fireequipment.fire.FireInspector;
 import fr.stan1712.wetston.fireequipment.fire.FireManager;
 import fr.stan1712.wetston.fireequipment.messages.Messages;
 import org.bukkit.command.Command;
@@ -25,7 +26,7 @@ public class FireEquipmentCommand implements TabExecutor {
 		register(new HelpSubCommand(messages));
 		register(new VersionSubCommand(plugin, messages));
 		register(new ReloadSubCommand(settings, messages, fire));
-		register(new FireSubCommand(fire, messages));
+		register(new FireSubCommand(fire, messages, new FireInspector(plugin, fire, messages)));
 	}
 
 	private void register(SubCommand subCommand) {
