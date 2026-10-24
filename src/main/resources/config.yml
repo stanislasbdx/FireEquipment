@@ -79,6 +79,7 @@ realisticFire:
     maxUpdatesPerCycle: 400
   features:
     flashover: true
+    backdraft: true
     heatAura: true
     weakBlocks: true
     collapse: true

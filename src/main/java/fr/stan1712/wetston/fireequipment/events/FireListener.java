@@ -9,19 +9,28 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.Bukkit;
+import org.bukkit.block.data.Openable;
+import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.Gate;
+import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
@@ -29,10 +38,12 @@ import java.util.Iterator;
 import java.util.List;
 
 public class FireListener implements Listener {
+	private final Plugin plugin;
 	private final FireManager fire;
 	private final AshManager ash;
 
-	public FireListener(FireManager fire) {
+	public FireListener(Plugin plugin, FireManager fire) {
+		this.plugin = plugin;
 		this.fire = fire;
 		this.ash = fire.getAsh();
 	}
@@ -141,6 +152,22 @@ public class FireListener implements Listener {
 		if(burningBlock != null) {
 			fire.extinguish(burningBlock);
 		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onOpen(PlayerInteractEvent event) {
+		final Block block = event.getClickedBlock();
+		if(event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != EquipmentSlot.HAND || block == null
+				|| !(block.getBlockData() instanceof Openable openable) || openable.isOpen() || !fire.isWorldEnabled(block.getWorld())
+				|| !(openable instanceof Door || openable instanceof TrapDoor || openable instanceof Gate)) {
+			return;
+		}
+
+		Bukkit.getScheduler().runTask(plugin, () -> {
+			if(block.getBlockData() instanceof Openable opened && opened.isOpen()) {
+				fire.getBackdraft().onOpened(block);
+			}
+		});
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

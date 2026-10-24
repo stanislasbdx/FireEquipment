@@ -40,11 +40,13 @@ public class FireManager {
 	private final CollapseManager collapse;
 	private final HeatAura heatAura;
 	private final WeakBlockBurster burster;
+	private final Backdraft backdraft;
 	private final Map<BlockKey, BurningBlock> burning = new HashMap<>();
 	private final Map<ChunkRef, Set<BlockKey>> byChunk = new HashMap<>();
 	private final ArrayDeque<BlockKey> pending = new ArrayDeque<>();
 	private final Map<BlockKey, Long> flashovers = new HashMap<>();
 	private final List<Runnable> shutdownHooks = new ArrayList<>();
+	private final Map<BlockKey, Long> ephemeralFlames = new HashMap<>();
 	private final Map<ChunkRef, Map<BlockKey, HotSpot>> hotSpots = new HashMap<>();
 
 	private FireSettings settings;
@@ -59,6 +61,7 @@ public class FireManager {
 		this.collapse = new CollapseManager(plugin, this);
 		this.heatAura = new HeatAura(this);
 		this.burster = new WeakBlockBurster(this);
+		this.backdraft = new Backdraft(plugin, this);
 		this.settings = FireSettings.load(plugin.getConfig());
 	}
 
@@ -117,6 +120,10 @@ public class FireManager {
 
 	public AshManager getAsh() {
 		return ash;
+	}
+
+	public Backdraft getBackdraft() {
+		return backdraft;
 	}
 
 	public CollapseManager getCollapse() {
@@ -437,6 +444,7 @@ public class FireManager {
 
 		heatAura.tick();
 		coolHotSpots();
+		expireEphemeralFlames();
 	}
 
 	private void update(BurningBlock burningBlock) {
@@ -626,40 +634,104 @@ public class FireManager {
 
 	private void flashover(Block block) {
 		final FireSettings.Confinement confinement = settings.confinement();
-		final BlockKey zone = new BlockKey(block.getWorld().getUID(), block.getX() >> 3, block.getY() >> 3, block.getZ() >> 3);
-		final Long last = flashovers.get(zone);
-		if(last != null && tick - last < confinement.flashoverCooldown()) {
-			return;
-		}
-
 		final Location center = block.getLocation().add(0.5, 0.5, 0.5);
 		final int radius = confinement.flashoverRadius();
-		if(heatAround(block.getWorld().getUID(), center.getX(), center.getY(), center.getZ(), radius, false) < confinement.flashoverHeat()) {
+		if(isZoneCoolingDown(block) || heatAround(block.getWorld().getUID(), center.getX(), center.getY(), center.getZ(), radius, false) < confinement.flashoverHeat()) {
 			return;
 		}
-		flashovers.put(zone, tick);
+		claimZone(block);
+		engulf(block, radius);
 
 		final World world = block.getWorld();
+		world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, FireDefaults.FLASHOVER_VOLUME, 0.5f);
+		world.playSound(center, Sound.BLOCK_FIRE_AMBIENT, FireDefaults.FLASHOVER_VOLUME, 0.6f);
+		world.spawnParticle(Particle.FLAME, center, 150, radius / 2.0, radius / 2.0, radius / 2.0, 0.05);
+		_log.debug("[flashover] Flashover at {} {} {}", block.getX(), block.getY(), block.getZ());
+	}
+
+	public boolean isZoneCoolingDown(Block block) {
+		final Long last = flashovers.get(zone(block));
+		return last != null && tick - last < settings.confinement().flashoverCooldown();
+	}
+
+	public void claimZone(Block block) {
+		flashovers.put(zone(block), tick);
+	}
+
+	private static BlockKey zone(Block block) {
+		return new BlockKey(block.getWorld().getUID(), block.getX() >> 3, block.getY() >> 3, block.getZ() >> 3);
+	}
+
+	public void engulf(Block center, int radius) {
+		final FireSettings.Confinement confinement = settings.confinement();
+		final ThreadLocalRandom random = ThreadLocalRandom.current();
+		final World world = center.getWorld();
+
 		for(int dx = -radius; dx <= radius; dx++) {
 			for(int dy = -radius; dy <= radius; dy++) {
 				for(int dz = -radius; dz <= radius; dz++) {
-					final Block target = FireBlocks.blockAt(world, block.getX() + dx, block.getY() + dy, block.getZ() + dz);
-					if(target != null && target.getType() == Material.TNT) {
+					final Block target = FireBlocks.blockAt(world, center.getX() + dx, center.getY() + dy, center.getZ() + dz);
+					if(target == null) {
+						continue;
+					}
+					if(target.getType() == Material.TNT) {
 						primeTnt(target);
 						continue;
 					}
-					final FireCategory category = target == null ? null : settings.categoryOf(target.getType());
-					if(category != null && hasAirFace(target) && ThreadLocalRandom.current().nextDouble() < confinement.flashoverIgniteChance()) {
+					if(target.getType().isAir()) {
+						if(random.nextDouble() < FireDefaults.EPHEMERAL_FLAME_CHANCE) {
+							placeEphemeralFlame(target);
+						}
+						continue;
+					}
+
+					final FireCategory category = settings.categoryOf(target.getType());
+					if(category != null && hasAirFace(target) && random.nextDouble() < confinement.flashoverIgniteChance()) {
 						ignite(target, category.maxHeat() * confinement.flashoverHeatRatio());
 					}
 				}
 			}
 		}
+	}
 
-		world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, FireDefaults.FLASHOVER_VOLUME, 0.5f);
-		world.playSound(center, Sound.BLOCK_FIRE_AMBIENT, FireDefaults.FLASHOVER_VOLUME, 0.6f);
-		world.spawnParticle(Particle.FLAME, center, 150, radius / 2.0, radius / 2.0, radius / 2.0, 0.05);
-		_log.debug("[flashover] Flashover at {} {} {}", block.getX(), block.getY(), block.getZ());
+	public void placeEphemeralFlame(Block cell) {
+		if(!cell.getType().isAir()) {
+			return;
+		}
+
+		final Fire flame = (Fire) Material.FIRE.createBlockData();
+		final Block below = FireBlocks.neighbor(cell, BlockFace.DOWN);
+		if(below == null || !below.getType().isSolid()) {
+			BlockFace attach = null;
+			for(BlockFace face : flame.getAllowedFaces()) {
+				final Block side = FireBlocks.neighbor(cell, face);
+				if(side != null && side.getType().isSolid()) {
+					attach = face;
+					break;
+				}
+			}
+			if(attach == null) {
+				return;
+			}
+			flame.setFace(attach, true);
+		}
+
+		cell.setBlockData(flame, false);
+		final long lifetime = ThreadLocalRandom.current().nextLong(FireDefaults.EPHEMERAL_FLAME_MIN_TICKS, FireDefaults.EPHEMERAL_FLAME_MAX_TICKS + 1);
+		ephemeralFlames.put(BlockKey.of(cell), tick + lifetime);
+	}
+
+	private void expireEphemeralFlames() {
+		ephemeralFlames.entrySet().removeIf(entry -> {
+			if(entry.getValue() > tick) {
+				return false;
+			}
+			final Block block = entry.getKey().toBlock();
+			if(block != null && block.getType() == Material.FIRE && !supportsFlame(block)) {
+				block.setType(Material.AIR, false);
+			}
+			return true;
+		});
 	}
 
 	private static boolean hasAirFace(Block block) {

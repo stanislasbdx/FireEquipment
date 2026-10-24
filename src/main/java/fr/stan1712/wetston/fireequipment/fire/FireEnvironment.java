@@ -63,6 +63,35 @@ public class FireEnvironment {
 		return new Environment(false, true, visited.size());
 	}
 
+	public static Environment room(Block start, Set<Long> blocked, int maxRoomVolume) {
+		final ArrayDeque<Block> queue = new ArrayDeque<>();
+		final Set<Long> visited = new HashSet<>(blocked);
+
+		queue.add(start);
+		visited.add(BlockKey.of(start).pack());
+		int volume = 0;
+
+		while(!queue.isEmpty()) {
+			final Block current = queue.poll();
+			volume++;
+			if(isExposed(current)) {
+				return new Environment(false, false, volume);
+			}
+			if(volume > maxRoomVolume) {
+				return new Environment(false, false, volume);
+			}
+
+			for(BlockFace face : FireBlocks.FACES) {
+				final Block next = FireBlocks.neighbor(current, face);
+				if(next != null && isTraversable(next) && visited.add(BlockKey.of(next).pack())) {
+					queue.add(next);
+				}
+			}
+		}
+
+		return new Environment(false, true, volume);
+	}
+
 	public static boolean isTraversable(Block block) {
 		final Material type = block.getType();
 		return type.isAir() || type == Material.FIRE || (!type.isSolid() && type != Material.WATER && type != Material.LAVA);

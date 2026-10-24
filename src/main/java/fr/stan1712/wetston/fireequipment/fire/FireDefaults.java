@@ -42,6 +42,14 @@ public final class FireDefaults {
 	public static final double FLASHOVER_IGNITE_CHANCE = 0.6;
 	public static final double FLASHOVER_HEAT_RATIO = 0.5;
 	public static final float FLASHOVER_VOLUME = 6;
+	public static final double EPHEMERAL_FLAME_CHANCE = 0.25;
+	public static final int BACKDRAFT_RADIUS = 4;
+	public static final double BACKDRAFT_HEAT_SHARE = 0.5;
+	public static final long BACKDRAFT_DELAY_TICKS = 20;
+	public static final int BACKDRAFT_REACH = 6;
+	public static final int BACKDRAFT_FIRE_TICKS = 100;
+	public static final long EPHEMERAL_FLAME_MIN_TICKS = 60;
+	public static final long EPHEMERAL_FLAME_MAX_TICKS = 120;
 
 	public static final double HOSE_COOLING = 12;
 	public static final double POWDER_KNOCKDOWN = 90;

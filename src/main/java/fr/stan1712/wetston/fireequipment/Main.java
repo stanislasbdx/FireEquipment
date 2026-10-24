@@ -125,7 +125,7 @@ public final class Main extends JavaPlugin {
 		final String logStep = "loadFire";
 
 		fireManager.start();
-		getServer().getPluginManager().registerEvents(new FireListener(fireManager), this);
+		getServer().getPluginManager().registerEvents(new FireListener(this, fireManager), this);
 		_log.info("[{}] Realistic fire loaded", logStep);
 	}
 
