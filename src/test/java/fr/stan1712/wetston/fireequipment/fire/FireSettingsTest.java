@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FireSettingsTest {
 	@Test
 	void usesDefaultsWithoutFactors() {
-		final FireSettings settings = FireSettings.load(new YamlConfiguration());
+		final FireSettings settings = FireSettings.load(new YamlConfiguration(), new YamlConfiguration());
 
 		assertEquals(FireDefaults.HEAT_GROWTH, settings.heat().growth());
 		assertEquals(FireDefaults.FLASHOVER_RADIUS, settings.confinement().flashoverRadius());
@@ -29,7 +29,7 @@ class FireSettingsTest {
 		config.set("realisticFire.factors.extinguish", 0.5);
 		config.set("realisticFire.factors.effects", 2);
 
-		final FireSettings settings = FireSettings.load(config);
+		final FireSettings settings = FireSettings.load(config, new YamlConfiguration());
 
 		assertEquals(FireDefaults.SPREAD_CHANCE * 2, settings.spread().baseChance());
 		assertEquals(FireDefaults.HEAT_GROWTH * 2, settings.heat().growth());
@@ -50,7 +50,7 @@ class FireSettingsTest {
 		config.set("realisticFire.features.scorch", false);
 		config.set("realisticFire.features.heatAura", false);
 
-		final FireSettings settings = FireSettings.load(config);
+		final FireSettings settings = FireSettings.load(config, new YamlConfiguration());
 
 		assertFalse(settings.features().flashover());
 		assertFalse(settings.features().structure());

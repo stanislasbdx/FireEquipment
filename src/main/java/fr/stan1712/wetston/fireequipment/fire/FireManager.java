@@ -1,5 +1,6 @@
 package fr.stan1712.wetston.fireequipment.fire;
 
+import fr.stan1712.wetston.fireequipment.config.MaterialsFile;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameRule;
@@ -64,7 +65,7 @@ public class FireManager {
 		this.heatAura = new HeatAura(this);
 		this.burster = new WeakBlockBurster(this);
 		this.backdraft = new Backdraft(plugin, this);
-		this.settings = FireSettings.load(plugin.getConfig());
+		this.settings = FireSettings.load(plugin.getConfig(), MaterialsFile.load(plugin));
 	}
 
 	public void start() {
@@ -108,7 +109,7 @@ public class FireManager {
 
 	public void reload() {
 		stop();
-		settings = FireSettings.load(plugin.getConfig());
+		settings = FireSettings.load(plugin.getConfig(), MaterialsFile.load(plugin));
 		start();
 	}
 

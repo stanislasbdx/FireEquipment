@@ -26,7 +26,7 @@ The realistic fire asks protection plugins through `BlockBurnEvent` before it ig
 
 ## Configuration
 
-`config.yml` is created on first start and upgraded automatically (missing keys are added) when the plugin version changes.
+`config.yml` is created on first start and upgraded automatically (missing keys are added) when the plugin version changes. The realistic fire block lists (flammable categories and weak blocks) live in `materials.yml`, next to it.
 
 ```yaml
 Equipment:

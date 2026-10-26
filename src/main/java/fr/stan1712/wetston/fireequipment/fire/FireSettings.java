@@ -72,7 +72,7 @@ public record FireSettings(
 		return categories.get(material);
 	}
 
-	public static FireSettings load(FileConfiguration config) {
+	public static FireSettings load(FileConfiguration config, FileConfiguration materials) {
 		final Features features = new Features(
 				feature(config, "flashover"),
 				feature(config, "structure"),
@@ -142,7 +142,7 @@ public record FireSettings(
 						FireDefaults.WEAK_RADIUS,
 						FireDefaults.WEAK_BURST_HEAT,
 						FireDefaults.WEAK_BURST_CHANCE,
-						MaterialMatcher.resolve(config.getStringList(ROOT + "weakBlocks.materials"))
+						MaterialMatcher.resolve(materials.getStringList("weakBlocks"))
 				),
 				new Ash(
 						features.scorch() ? Math.min(1, FireDefaults.ASH_CHANCE * factors.effects()) : 0,
@@ -159,7 +159,7 @@ public record FireSettings(
 						WeightedMaterials.of(FireDefaults.SCORCH_MATERIALS, Material.COARSE_DIRT)
 				),
 				features,
-				loadCategories(config, factors)
+				loadCategories(materials, factors)
 		);
 	}
 
@@ -175,10 +175,12 @@ public record FireSettings(
 		return (int) Math.round(value * 20);
 	}
 
-	private static Map<Material, FireCategory> loadCategories(FileConfiguration config, Factors factors) {
+	private static Map<Material, FireCategory> loadCategories(FileConfiguration materials, Factors factors) {
 		final Map<Material, FireCategory> categories = new EnumMap<>(Material.class);
 
-		final ConfigurationSection section = config.getConfigurationSection(ROOT + "categories");
+		final ConfigurationSection section = materials.contains("categories", true) || materials.getDefaults() == null
+				? materials.getConfigurationSection("categories")
+				: materials.getDefaults().getConfigurationSection("categories");
 		if(section == null) {
 			_log.warn("[loadCategories] No fire category defined");
 			return categories;
