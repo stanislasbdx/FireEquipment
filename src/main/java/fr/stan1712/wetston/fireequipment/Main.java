@@ -1,9 +1,10 @@
 package fr.stan1712.wetston.fireequipment;
 
 import fr.stan1712.wetston.fireequipment.commands.FireEquipmentCommand;
-import fr.stan1712.wetston.fireequipment.commands.GiveCommand;
 import fr.stan1712.wetston.fireequipment.config.ConfigMigrator;
 import fr.stan1712.wetston.fireequipment.config.PluginSettings;
+import fr.stan1712.wetston.fireequipment.events.FireListener;
+import fr.stan1712.wetston.fireequipment.fire.FireManager;
 import fr.stan1712.wetston.fireequipment.messages.Messages;
 import fr.stan1712.wetston.fireequipment.pack.ResourcePackListener;
 import fr.stan1712.wetston.fireequipment.tools.ExtinguisherTool;
@@ -33,6 +34,7 @@ public final class Main extends JavaPlugin {
 	private Messages messages;
 	private ItemFactory items;
 	private ToolListener toolListener;
+	private FireManager fireManager;
 
 	public boolean versionCheck() {
 		final String logStep = "versionCheck";
@@ -84,6 +86,7 @@ public final class Main extends JavaPlugin {
 		settings = new PluginSettings(this);
 		messages = new Messages(this, settings);
 		items = new ItemFactory(this, settings);
+		fireManager = new FireManager(this);
 	}
 
 	private void loadCommand(String logStep, String commandName, TabExecutor commandClass) {
@@ -99,8 +102,7 @@ public final class Main extends JavaPlugin {
 	private void loadCommands() {
 		final String logStep = "loadCommands";
 
-		loadCommand(logStep, "firequip", new FireEquipmentCommand(this, settings, messages));
-		loadCommand(logStep, "fequip", new GiveCommand(items, settings, messages));
+		loadCommand(logStep, "fequip", new FireEquipmentCommand(this, settings, messages, fireManager, items));
 
 		_log.info("[{}] Commands have been loaded !", logStep);
 	}
@@ -108,13 +110,21 @@ public final class Main extends JavaPlugin {
 	private void loadEvents() {
 		final String logStep = "loadEvents";
 
-		final List<FireTool> tools = List.of(new HoseTool(this, settings), new PumpTool(settings), new ExtinguisherTool(settings));
+		final List<FireTool> tools = List.of(new HoseTool(this, settings, fireManager), new PumpTool(settings), new ExtinguisherTool(settings, fireManager));
 		toolListener = new ToolListener(items, settings, messages, tools);
 		getServer().getPluginManager().registerEvents(toolListener, this);
 
 		getServer().getPluginManager().registerEvents(new ResourcePackListener(settings), this);
 
 		_log.info("[{}] {} tools loaded", logStep, tools.size());
+	}
+
+	private void loadFire() {
+		final String logStep = "loadFire";
+
+		fireManager.start();
+		getServer().getPluginManager().registerEvents(new FireListener(this, fireManager), this);
+		_log.info("[{}] Realistic fire loaded", logStep);
 	}
 
 	private void logNewStep(String step) {
@@ -141,11 +151,15 @@ public final class Main extends JavaPlugin {
 
 			logNewStep("loadEvents");
 			loadEvents();
+
+			logNewStep("loadFire");
+			loadFire();
 		}
 	}
 
 	@Override
 	public void onDisable() {
 		if(toolListener != null) toolListener.shutdown();
+		if(fireManager != null) fireManager.shutdown();
 	}
 }

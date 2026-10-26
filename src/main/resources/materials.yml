@@ -1,0 +1,56 @@
+weakBlocks:
+  - "GLASS"
+  - "TINTED_GLASS"
+  - "*_STAINED_GLASS"
+  - "GLASS_PANE"
+  - "*_GLASS_PANE"
+  - "#doors"
+  - "#trapdoors"
+categories:
+  wood:
+    burnTime: 45
+    ignitionChance: 0.6
+    maxHeat: 100
+    materials:
+      - "#logs_that_burn"
+      - "#planks"
+      - "#wooden_stairs"
+      - "#wooden_slabs"
+      - "#wooden_fences"
+      - "#fence_gates"
+      - "#wooden_doors"
+      - "#wooden_trapdoors"
+  foliage:
+    burnTime: 6
+    ignitionChance: 1.0
+    maxHeat: 60
+    ash: false
+    materials:
+      - "#leaves"
+      - "#flowers"
+      - "SHORT_GRASS"
+      - "TALL_GRASS"
+      - "FERN"
+      - "LARGE_FERN"
+      - "HAY_BLOCK"
+      - "DRIED_KELP_BLOCK"
+  textile:
+    burnTime: 10
+    ignitionChance: 0.9
+    maxHeat: 70
+    materials:
+      - "#wool"
+      - "#wool_carpets"
+      - "#beds"
+  paper:
+    burnTime: 20
+    ignitionChance: 0.8
+    maxHeat: 80
+    materials:
+      - "BOOKSHELF"
+  fuel:
+    burnTime: 300
+    ignitionChance: 0.3
+    maxHeat: 150
+    materials:
+      - "COAL_BLOCK"

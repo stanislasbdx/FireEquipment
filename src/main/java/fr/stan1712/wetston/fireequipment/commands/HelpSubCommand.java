@@ -18,9 +18,10 @@ class HelpSubCommand implements SubCommand {
 	@Override
 	public void execute(CommandSender sender, String[] args) {
 		messages.box(sender,
-			"/firequip help = " + messages.get("Core.HelpMsg.DHelp"),
-			"/firequip version = " + messages.get("Core.HelpMsg.DVersion"),
-			"/firequip reload = " + messages.get("Core.HelpMsg.DReload"),
+			"/fequip help = " + messages.get("Core.HelpMsg.DHelp"),
+			"/fequip version = " + messages.get("Core.HelpMsg.DVersion"),
+			"/fequip reload = " + messages.get("Core.HelpMsg.DReload"),
+			"/fequip fire <stats/clear [radius]/inspect> = " + messages.get("Core.HelpMsg.DFire"),
 			"/fequip <item> = " + messages.get("Core.HelpMsg.DGive")
 		);
 	}

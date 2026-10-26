@@ -1,6 +1,6 @@
 # FireEquipment
 
-Roleplay tools for firefighter gameplay on Spigot, Paper and Purpur (Minecraft 1.21+).
+Roleplay tools for firefighter gameplay on Spigot, Paper and Purpur (Minecraft 1.21.4+).
 
 ## Tools
 
@@ -12,19 +12,21 @@ Roleplay tools for firefighter gameplay on Spigot, Paper and Purpur (Minecraft 1
 
 Tools are recognised by a persistent data tag, so renaming an item or changing its texture does not affect them.
 Block changes go through `BlockPlaceEvent` / `BlockBreakEvent`, so region protection plugins are respected.
+The realistic fire asks protection plugins through `BlockBurnEvent` before it ignites, burns out, scorches or cracks a block.
 
 ## Commands
 
 | Command | Description | Permission |
 | --- | --- | --- |
-| `/firequip help` | Help page | `firequip.info` |
-| `/firequip version` | Plugin version | `firequip.info` |
-| `/firequip reload` | Reload `config.yml` | `firequip.admin.reload` |
+| `/fequip help` | Help page | `firequip.info` |
+| `/fequip version` | Plugin version | `firequip.info` |
+| `/fequip reload` | Reload `config.yml` | `firequip.admin.reload` |
+| `/fequip fire <stats\|clear [radius]\|inspect>` | Realistic fire overview, extinguish or thermal camera | `firequip.admin.fire` / `firequip.inspect` |
 | `/fequip <hose\|pump\|extinguisher>` | Give yourself a tool | `firequip.tools.give` |
 
 ## Configuration
 
-`config.yml` is created on first start and upgraded automatically (missing keys are added) when the plugin version changes.
+`config.yml` is created on first start and upgraded automatically (missing keys are added) when the plugin version changes. The realistic fire block lists (flammable categories and weak blocks) live in `materials.yml`, next to it.
 
 ```yaml
 Equipment:
